@@ -89,6 +89,22 @@ export async function POST(req: NextRequest) {
     })
   );
 
+  const queryDebug = results.map((result, i) => ({
+    state: queries[i].code,
+    query: queries[i].query,
+    ...(result.status === "fulfilled"
+      ? { count: result.value.length }
+      : { error: result.reason instanceof Error ? result.reason.message : String(result.reason) }),
+  }));
+
+  for (const entry of queryDebug) {
+    if ("error" in entry) {
+      console.error(`[search] (${provider}) "${entry.query}" failed: ${entry.error}`);
+    } else {
+      console.log(`[search] (${provider}) "${entry.query}" -> ${entry.count} result(s)`);
+    }
+  }
+
   const rawArticles = results
     .filter((r): r is PromiseFulfilledResult<StateRawArticle[]> => r.status === "fulfilled")
     .flatMap((r) => r.value);
@@ -144,5 +160,9 @@ export async function POST(req: NextRequest) {
 
   const limited = limit > 0 ? articles.slice(0, limit) : articles;
 
-  return NextResponse.json({ articles: limited, total: articles.length });
+  return NextResponse.json({
+    articles: limited,
+    total: articles.length,
+    meta: { provider, queries: queryDebug },
+  });
 }
