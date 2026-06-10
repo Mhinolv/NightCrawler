@@ -40,22 +40,25 @@ const EXTRACT_TOOL = {
             relevant: {
               type: "boolean",
               description:
-                "True only if the article is about a real accident/crash involving a truck driver, 18-wheeler/tractor-trailer, or service vehicle (delivery van, tow truck, garbage truck, utility truck, etc). False for lawyer/attorney ads, unrelated stories, or metaphorical uses (e.g. 'trucking along').",
+                "True only if the title/snippet explicitly indicates a real accident/crash involving a truck driver, 18-wheeler/tractor-trailer, or service vehicle (delivery van, tow truck, garbage truck, utility truck, etc). " +
+                "False for lawyer/attorney ads, unrelated stories, metaphorical uses (e.g. 'trucking along'), accidents involving only cars/pedestrians/other non-qualifying vehicles, or articles too vague to confirm a qualifying vehicle was involved. " +
+                "When in doubt, mark false rather than guessing.",
             },
             location: {
               type: "string",
               description:
-                "Short location of the accident, e.g. 'I-35 near Round Rock, TX'. Omit this field entirely if the location can't be determined from the title/snippet.",
+                "Short location of the accident, e.g. 'I-35 near Round Rock, TX'. Only include if the location is explicitly stated in the title/snippet. Omit this field entirely otherwise.",
             },
             vehicleType: {
               type: "string",
               enum: VEHICLE_TYPES,
-              description: "The primary vehicle type involved in the accident.",
+              description:
+                "The primary vehicle type involved, only if explicitly stated or clearly implied by the title/snippet (e.g. 'semi', 'tractor-trailer' -> 18-wheeler; 'garbage truck', 'delivery van', 'tow truck' -> service vehicle). Do not guess based on unrelated context (e.g. a person's occupation). Omit this field if unclear.",
             },
             casualties: {
               type: "string",
               description:
-                "Short description of injuries/fatalities, e.g. '1 fatality confirmed' or 'No injuries reported'.",
+                "Short description of injuries/fatalities, e.g. '1 fatality confirmed' or 'No injuries reported'. Only include if the title/snippet explicitly states this. Omit this field if not mentioned.",
             },
             summary: {
               type: "string",
@@ -80,7 +83,15 @@ function buildPrompt(articles: ExtractionInput[]): string {
 
   return `Below is a list of news articles found via a search for accidents involving truck drivers, 18-wheelers, and service vehicles.
 
-For each article, determine whether it is actually about such an accident (not a lawyer ad, unrelated story, or metaphorical use), and if so extract the location, vehicle type, casualties, and a short summary based on the title and snippet provided.
+For each article, determine whether the title/snippet explicitly indicates a real accident or crash involving a truck driver, 18-wheeler/tractor-trailer, or service vehicle (delivery van, tow truck, garbage truck, utility truck, etc).
+
+Mark an article relevant=false if:
+- It's a lawyer/attorney ad
+- It's an unrelated story or uses "truck"/"crash" metaphorically
+- The accident only involves cars, pedestrians, or other non-qualifying vehicles
+- The title/snippet is too vague to confirm a qualifying vehicle was actually involved in a crash
+
+Do not infer details (vehicle type, location, casualties) from context that isn't stated — e.g. don't assume someone drives a truck because of their job title. If a field can't be confirmed from the text, omit it.
 
 Articles:
 ${items}
