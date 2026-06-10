@@ -1,3 +1,4 @@
+import { getSeverity } from "@/lib/casualties";
 import { Article } from "@/lib/types";
 
 function timeAgo(iso: string): string {
@@ -17,17 +18,8 @@ const VEHICLE_LABELS: Record<string, string> = {
   other: "Vehicle",
 };
 
-function isFatal(casualties?: string): boolean {
-  return !!casualties && /\bfatal/i.test(casualties) && !/no fatal/i.test(casualties);
-}
-
-function isClear(casualties?: string): boolean {
-  return !!casualties && /no injur/i.test(casualties);
-}
-
 export default function ArticleCard({ article }: { article: Article }) {
-  const fatal = isFatal(article.casualties);
-  const clear = !fatal && isClear(article.casualties);
+  const severity = getSeverity(article.casualties);
 
   return (
     <article className="flex flex-col gap-3 rounded-lg border border-line bg-surface p-5 shadow-soft-sm transition-shadow hover:shadow-soft-md sm:p-6">
@@ -66,9 +58,9 @@ export default function ArticleCard({ article }: { article: Article }) {
         {article.casualties && (
           <span
             className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-              fatal
+              severity === "fatal"
                 ? "bg-danger-soft text-danger"
-                : clear
+                : severity === "clear"
                   ? "bg-positive-soft text-positive"
                   : "bg-gold-soft text-gold"
             }`}

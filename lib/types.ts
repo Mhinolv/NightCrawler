@@ -17,4 +17,8 @@ export interface SearchRequest {
   states: string[];
   keywords: string[];
   window: string;
+  /** "newest" (default), "oldest", or "severity" (most severe first). */
+  sort?: string;
+  /** Max results to return. 0 or omitted means no limit. */
+  limit?: number;
 }

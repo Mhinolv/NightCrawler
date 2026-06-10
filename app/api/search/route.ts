@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { US_STATES } from "@/lib/config";
+import { severityRank } from "@/lib/casualties";
+import { SortValue, US_STATES } from "@/lib/config";
 import { dedupeArticles } from "@/lib/dedupe";
 import { extractArticleDetails } from "@/lib/extract";
 import { fetchArticles, RawArticle, TimeWindow } from "@/lib/providers";
 import { Article, SearchRequest } from "@/lib/types";
 
 const VALID_WINDOWS: TimeWindow[] = ["1d", "3d", "7d"];
+const VALID_SORTS: SortValue[] = ["newest", "oldest", "severity"];
+
+/** Cap on how many deduped articles get sent to Claude per search, to bound cost/latency. */
+const MAX_EXTRACTION_CANDIDATES = 40;
 
 interface StateRawArticle extends RawArticle {
   state: string;
@@ -29,7 +34,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { states, keywords, window } = body;
+  const { states, keywords, window, sort = "newest", limit = 0 } = body;
 
   if (!Array.isArray(states) || states.length === 0) {
     return NextResponse.json({ error: "states must be a non-empty array" }, { status: 400 });
@@ -42,6 +47,15 @@ export async function POST(req: NextRequest) {
       { error: `window must be one of: ${VALID_WINDOWS.join(", ")}` },
       { status: 400 }
     );
+  }
+  if (!VALID_SORTS.includes(sort as SortValue)) {
+    return NextResponse.json(
+      { error: `sort must be one of: ${VALID_SORTS.join(", ")}` },
+      { status: 400 }
+    );
+  }
+  if (typeof limit !== "number" || limit < 0) {
+    return NextResponse.json({ error: "limit must be a non-negative number" }, { status: 400 });
   }
 
   const stateNameByCode = new Map(US_STATES.map((s) => [s.code, s.name]));
@@ -66,7 +80,9 @@ export async function POST(req: NextRequest) {
     .filter((r): r is PromiseFulfilledResult<StateRawArticle[]> => r.status === "fulfilled")
     .flatMap((r) => r.value);
 
-  const deduped = dedupeArticles(rawArticles);
+  const deduped = dedupeArticles(rawArticles)
+    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+    .slice(0, MAX_EXTRACTION_CANDIDATES);
 
   const extractionInputs = deduped.map((article, index) => ({
     id: String(index),
@@ -98,7 +114,22 @@ export async function POST(req: NextRequest) {
       return article;
     })
     .filter((a): a is Article => a !== null)
-    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+    .sort((a, b) => {
+      switch (sort as SortValue) {
+        case "oldest":
+          return new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime();
+        case "severity": {
+          const rankDiff = severityRank(a.casualties) - severityRank(b.casualties);
+          if (rankDiff !== 0) return rankDiff;
+          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+        }
+        case "newest":
+        default:
+          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      }
+    });
 
-  return NextResponse.json({ articles });
+  const limited = limit > 0 ? articles.slice(0, limit) : articles;
+
+  return NextResponse.json({ articles: limited, total: articles.length });
 }

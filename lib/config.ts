@@ -73,3 +73,31 @@ export const TIME_WINDOWS: TimeWindowOption[] = [
   { value: "3d", label: "Last 3 days" },
   { value: "7d", label: "Last 7 days" },
 ];
+
+export type SortValue = "newest" | "oldest" | "severity";
+
+export interface SortOption {
+  value: SortValue;
+  label: string;
+}
+
+export const SORT_OPTIONS: SortOption[] = [
+  { value: "newest", label: "Newest first" },
+  { value: "oldest", label: "Oldest first" },
+  { value: "severity", label: "Most severe first" },
+];
+
+export interface LimitOption {
+  value: number;
+  label: string;
+}
+
+/** A limit of 0 means "no limit" (return all matching results). */
+export const RESULT_LIMITS: LimitOption[] = [
+  { value: 10, label: "10" },
+  { value: 25, label: "25" },
+  { value: 50, label: "50" },
+  { value: 0, label: "All" },
+];
+
+export const DEFAULT_RESULT_LIMIT = 25;

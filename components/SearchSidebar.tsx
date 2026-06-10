@@ -1,12 +1,22 @@
 "use client";
 
 import { useState } from "react";
-import { DEFAULT_KEYWORDS, TIME_WINDOWS, US_STATES } from "@/lib/config";
+import {
+  DEFAULT_KEYWORDS,
+  DEFAULT_RESULT_LIMIT,
+  RESULT_LIMITS,
+  SORT_OPTIONS,
+  SortValue,
+  TIME_WINDOWS,
+  US_STATES,
+} from "@/lib/config";
 
 export interface SearchParams {
   states: string[];
   keywords: string[];
   window: string;
+  sort: SortValue;
+  limit: number;
 }
 
 interface SearchSidebarProps {
@@ -50,6 +60,8 @@ export default function SearchSidebar({ onSearch, loading }: SearchSidebarProps)
   const [customKeyword, setCustomKeyword] = useState("");
   const [customKeywords, setCustomKeywords] = useState<string[]>([]);
   const [window, setWindow] = useState(TIME_WINDOWS[0].value);
+  const [sort, setSort] = useState<SortValue>(SORT_OPTIONS[0].value);
+  const [limit, setLimit] = useState(DEFAULT_RESULT_LIMIT);
 
   function toggleState(code: string) {
     setSelectedStates((prev) =>
@@ -77,7 +89,7 @@ export default function SearchSidebar({ onSearch, loading }: SearchSidebarProps)
   }
 
   function handleSubmit() {
-    onSearch({ states: selectedStates, keywords: selectedKeywords, window });
+    onSearch({ states: selectedStates, keywords: selectedKeywords, window, sort, limit });
   }
 
   return (
@@ -163,6 +175,28 @@ export default function SearchSidebar({ onSearch, loading }: SearchSidebarProps)
               active={window === option.value}
               onClick={() => setWindow(option.value)}
             >
+              {option.label}
+            </Chip>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Kicker>Sort by</Kicker>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {SORT_OPTIONS.map((option) => (
+            <Chip key={option.value} active={sort === option.value} onClick={() => setSort(option.value)}>
+              {option.label}
+            </Chip>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Kicker>Result limit</Kicker>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {RESULT_LIMITS.map((option) => (
+            <Chip key={option.value} active={limit === option.value} onClick={() => setLimit(option.value)}>
               {option.label}
             </Chip>
           ))}
