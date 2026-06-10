@@ -1,0 +1,147 @@
+/* Mutual — web-app UI kit layout styles.
+   Pairs with ../../colors_and_type.css (tokens). */
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+#root { min-height: 100%; }
+
+/* faint warmth behind the app */
+.app {
+  min-height: 100vh;
+  background:
+    radial-gradient(60% 50% at 78% 0%, rgba(47,128,121,0.06), transparent 70%),
+    radial-gradient(70% 55% at 12% 4%, rgba(238,110,79,0.07), transparent 70%),
+    var(--paper);
+}
+
+/* ---------- top bar ---------- */
+.topbar {
+  position: sticky; top: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px;
+  background: rgba(251,248,243,0.82);
+  backdrop-filter: saturate(140%) blur(12px);
+  -webkit-backdrop-filter: saturate(140%) blur(12px);
+  border-bottom: 1px solid var(--line);
+}
+.topbar .brand { display: flex; align-items: center; gap: 9px; }
+.topbar .brand b { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; }
+.topbar .right { display: flex; align-items: center; gap: 14px; }
+
+/* ---------- layout ---------- */
+.page { max-width: 680px; margin: 0 auto; padding: 40px 24px 80px; }
+.center-wrap { min-height: calc(100vh - 58px); display: grid; place-items: center; padding: 32px 24px 64px; }
+
+.kicker { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-3); }
+
+/* ---------- question card ---------- */
+.qcard {
+  width: 100%; max-width: 600px;
+  background: var(--surface);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  padding: 34px 38px 30px;
+}
+.qcard .qhead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
+.qcard .question {
+  font-family: var(--font-serif); font-weight: 400;
+  font-size: clamp(30px, 4.4vw, 44px); line-height: 1.14; letter-spacing: -0.02em;
+  margin: 0 0 28px; text-wrap: balance; color: var(--ink);
+}
+.qcard .question em { font-style: italic; color: var(--coral-deep); }
+.qcard .qactions { display: flex; gap: 12px; align-items: center; }
+
+/* ---------- buttons ---------- */
+.btn {
+  font-family: var(--font-sans); font-size: 15px; font-weight: 600;
+  border: none; cursor: pointer; border-radius: var(--radius-pill);
+  padding: 12px 24px; display: inline-flex; align-items: center; gap: 8px; white-space: nowrap;
+  transition: background var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--coral); color: #fff; box-shadow: var(--shadow-coral); }
+.btn-primary:hover { background: var(--coral-deep); }
+.btn-primary:active { box-shadow: none; }
+.btn-secondary { background: var(--surface); color: var(--ink); border: 1.5px solid var(--line-strong); }
+.btn-secondary:hover { background: var(--paper-2); }
+.btn-ghost { background: transparent; color: var(--coral-deep); padding-left: 12px; padding-right: 12px; }
+.btn-ghost:hover { background: var(--coral-soft); }
+.btn:disabled { background: var(--paper-2); color: var(--ink-4); box-shadow: none; cursor: not-allowed; transform: none; }
+.iconbtn {
+  width: 40px; height: 40px; border-radius: var(--radius-pill); border: 1px solid var(--line);
+  background: var(--surface); display: grid; place-items: center; cursor: pointer; color: var(--ink-2);
+  transition: background var(--dur-fast), color var(--dur-fast);
+}
+.iconbtn:hover { background: var(--paper-2); color: var(--ink); }
+
+/* ---------- avatars ---------- */
+.avatar { border-radius: var(--radius-pill); display: grid; place-items: center; color: #fff; font-weight: 700; flex: 0 0 auto; }
+.avatar.you { background: var(--coral); }
+.avatar.them { background: var(--teal); }
+.pair { display: flex; align-items: center; }
+.pair .avatar + .avatar { margin-left: -10px; border: 2.5px solid var(--paper); }
+
+/* ---------- chips / badges ---------- */
+.chips { display: flex; gap: 9px; flex-wrap: wrap; }
+.chip { font-size: 13px; font-weight: 500; border-radius: var(--radius-pill); padding: 8px 15px; border: 1px solid var(--line-strong); background: var(--surface); color: var(--ink-2); cursor: pointer; transition: all var(--dur-fast); }
+.chip:hover { border-color: var(--ink-3); }
+.chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+.badge { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.04em; border-radius: var(--radius-pill); padding: 5px 11px; display: inline-flex; align-items: center; gap: 6px; }
+.badge.new { background: var(--coral-soft); color: var(--coral-deep); }
+.badge.done { background: var(--positive-soft); color: #2c7a52; }
+.badge.wait { background: var(--paper-2); color: var(--ink-2); }
+.badge.weekly { background: var(--gold-soft); color: #9a6c14; }
+
+/* ---------- composer ---------- */
+.composer { width: 100%; max-width: 600px; }
+.composer .question { font-family: var(--font-serif); font-weight: 400; font-size: clamp(26px,3.6vw,36px); line-height: 1.18; letter-spacing: -0.02em; margin: 0 0 22px; text-wrap: balance; }
+.answer-field {
+  width: 100%; font-family: var(--font-sans); font-size: 17px; line-height: 1.6; color: var(--ink);
+  background: var(--surface); border: 1.5px solid var(--line-strong); border-radius: var(--radius-lg);
+  padding: 18px 20px; resize: none; min-height: 160px; transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+}
+.answer-field::placeholder { color: var(--ink-3); }
+.answer-field:focus { outline: none; border-color: var(--coral); box-shadow: var(--ring-focus); }
+.composer-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 18px; }
+.count { font-family: var(--font-mono); font-size: 12px; color: var(--ink-3); }
+
+/* ---------- reveal ---------- */
+.reveal { width: 100%; max-width: 620px; }
+.reveal .question { font-family: var(--font-serif); font-weight: 400; font-size: clamp(26px,3.6vw,34px); line-height: 1.18; letter-spacing: -0.02em; margin: 0 0 26px; text-wrap: balance; text-align: center; }
+.answers { display: grid; gap: 16px; }
+.answer-card { background: var(--surface); border-radius: var(--radius-lg); padding: 20px 22px; box-shadow: var(--shadow-sm); border-top: 3px solid transparent; }
+.answer-card.you { border-top-color: var(--coral); }
+.answer-card.them { border-top-color: var(--teal); }
+.answer-card .who { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.answer-card .who .name { font-weight: 700; font-size: 14px; }
+.answer-card .who .name.you { color: var(--coral-deep); }
+.answer-card .who .name.them { color: var(--teal-deep); }
+.answer-card .text { font-size: 16px; line-height: 1.6; color: var(--ink); }
+
+/* ---------- history list ---------- */
+.section-head { display: flex; align-items: center; justify-content: space-between; margin: 40px 0 14px; }
+.section-head h2 { font-size: 18px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+.qlist { display: flex; flex-direction: column; gap: 10px; }
+.qrow { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 16px 18px; cursor: pointer; transition: box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
+.qrow:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
+.qrow .qtext { flex: 1; font-family: var(--font-serif); font-size: 18px; line-height: 1.3; color: var(--ink); }
+.qrow .qmeta { display: flex; align-items: center; gap: 10px; }
+
+/* ---------- entrance ----------
+   Transform-only rise — never touches opacity, so content stays
+   visible even if the animation is paused (e.g. backgrounded tab). */
+@media (prefers-reduced-motion: no-preference) {
+  .enter   { animation: rise var(--dur-slow) var(--ease-soft); }
+  .enter-2 { animation: rise var(--dur-slow) var(--ease-soft) 90ms backwards; }
+  .enter-3 { animation: rise var(--dur-slow) var(--ease-soft) 180ms backwards; }
+  @keyframes rise { from { transform: translateY(12px); } to { transform: none; } }
+}
+
+.divider { height: 1px; background: var(--line); border: 0; margin: 0; }

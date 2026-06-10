@@ -1,0 +1,35 @@
+<!-- @dsCard group="Brand" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../colors_and_type.css" rel="stylesheet">
+<style>
+  body { margin:0; font-family:var(--font-sans); background:var(--surface); color:var(--ink); padding:24px 28px; }
+  .kicker { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin:0 0 18px; }
+  .row { display:flex; align-items:center; gap:34px; flex-wrap:wrap; }
+  .lockup { display:flex; align-items:center; gap:11px; }
+  .word { font-family:var(--font-sans); font-weight:700; font-size:30px; letter-spacing:-0.02em; }
+  .tile { display:grid; place-items:center; width:92px; height:72px; border-radius:var(--radius-md); }
+  .cap { font-size:11px; color:var(--ink-3); text-align:center; margin-top:8px; font-family:var(--font-mono); }
+  .col { display:flex; flex-direction:column; align-items:center; }
+</style>
+</head>
+<body>
+  <p class="kicker">Logo — mark + wordmark</p>
+  <div class="row">
+    <div class="lockup">
+      <img src="../assets/mark.svg" width="42" height="42" alt="Mutual mark">
+      <span class="word">Mutual</span>
+    </div>
+    <div class="col"><div class="tile" style="background:var(--paper)"><img src="../assets/mark.svg" width="40" height="40" alt=""></div><div class="cap">on paper</div></div>
+    <div class="col"><div class="tile" style="background:var(--ink)"><img src="../assets/mark-reverse.svg" width="40" height="40" alt=""></div><div class="cap">reverse</div></div>
+    <div class="col"><div class="tile" style="background:var(--surface);border:1px solid var(--line)"><img src="../assets/mark-ink.svg" width="40" height="40" alt=""></div><div class="cap">mono</div></div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!-- @dsCard group="Type" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI Scale — Hanken Grotesk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../colors_and_type.css" rel="stylesheet">
+<style>
+  body { margin:0; font-family:var(--font-sans); background:var(--surface); color:var(--ink); padding:24px 28px; }
+  .kicker { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin:0 0 16px; }
+  .row { display:flex; align-items:baseline; gap:14px; padding:7px 0; border-bottom:1px solid var(--line); }
+  .row:last-child { border-bottom:0; }
+  .tag { font-family:var(--font-mono); font-size:10px; color:var(--ink-3); width:96px; flex:0 0 auto; text-transform:uppercase; }
+  .s1 { font-size:36px; font-weight:700; letter-spacing:-0.02em; }
+  .s2 { font-size:28px; font-weight:600; letter-spacing:-0.02em; }
+  .s3 { font-size:22px; font-weight:600; }
+  .s4 { font-size:18px; font-weight:500; }
+  .s5 { font-size:16px; font-weight:400; }
+  .s6 { font-size:14px; font-weight:400; color:var(--ink-2); }
+</style>
+</head>
+<body>
+  <p class="kicker">UI &amp; body · Hanken Grotesk</p>
+  <div class="row"><span class="tag">2xl · 700</span><span class="s1">Page title</span></div>
+  <div class="row"><span class="tag">xl · 600</span><span class="s2">Section heading</span></div>
+  <div class="row"><span class="tag">lg · 600</span><span class="s3">Card heading</span></div>
+  <div class="row"><span class="tag">md · 500</span><span class="s4">Lead paragraph</span></div>
+  <div class="row"><span class="tag">base · 400</span><span class="s5">Body text — the quick brown fox</span></div>
+  <div class="row"><span class="tag">sm · 400</span><span class="s6">Caption &amp; meta text</span></div>
+</body>
+</html>

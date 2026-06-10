@@ -1,0 +1,34 @@
+<!-- @dsCard group="Colors" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Paper & Ink</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../colors_and_type.css" rel="stylesheet">
+<style>
+  body { margin:0; font-family:var(--font-sans); background:var(--surface); color:var(--ink); padding:24px; }
+  .row { display:grid; grid-template-columns:repeat(6,1fr); gap:10px; }
+  .sw { border-radius:var(--radius-md); border:1px solid var(--line); overflow:hidden; }
+  .chip { height:64px; }
+  .meta { padding:8px 10px; }
+  .name { font-size:12px; font-weight:600; }
+  .hex { font-family:var(--font-mono); font-size:11px; color:var(--ink-2); text-transform:uppercase; }
+  .kicker { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin:0 0 14px; }
+</style>
+</head>
+<body>
+  <p class="kicker">Paper &amp; Ink — warm neutrals</p>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:#FBF8F3"></div><div class="meta"><div class="name">Paper</div><div class="hex">#FBF8F3</div></div></div>
+    <div class="sw"><div class="chip" style="background:#F4EEE4"></div><div class="meta"><div class="name">Paper 2</div><div class="hex">#F4EEE4</div></div></div>
+    <div class="sw"><div class="chip" style="background:#FFFFFF"></div><div class="meta"><div class="name">Surface</div><div class="hex">#FFFFFF</div></div></div>
+    <div class="sw"><div class="chip" style="background:#ECE4D8"></div><div class="meta"><div class="name">Line</div><div class="hex">#ECE4D8</div></div></div>
+    <div class="sw"><div class="chip" style="background:#9C9286"></div><div class="meta"><div class="name">Ink 3</div><div class="hex">#9C9286</div></div></div>
+    <div class="sw"><div class="chip" style="background:#2A2622"></div><div class="meta"><div class="name">Ink</div><div class="hex">#2A2622</div></div></div>
+  </div>
+</body>
+</html>

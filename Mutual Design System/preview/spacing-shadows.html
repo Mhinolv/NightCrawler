@@ -1,0 +1,31 @@
+<!-- @dsCard group="Spacing" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Elevation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../colors_and_type.css" rel="stylesheet">
+<style>
+  body { margin:0; font-family:var(--font-sans); background:var(--paper); color:var(--ink); padding:30px 28px 34px; }
+  .kicker { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin:0 0 22px; }
+  .row { display:flex; gap:26px; }
+  .item { text-align:center; }
+  .box { width:96px; height:64px; background:var(--surface); border-radius:var(--radius-md); }
+  .nm { font-size:12px; font-weight:600; margin-top:14px; }
+</style>
+</head>
+<body>
+  <p class="kicker">Elevation — soft, warm-tinted shadows</p>
+  <div class="row">
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-xs)"></div><div class="nm">xs</div></div>
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-sm)"></div><div class="nm">sm</div></div>
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-md)"></div><div class="nm">md</div></div>
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-lg)"></div><div class="nm">lg</div></div>
+    <div class="item"><div class="box" style="box-shadow:var(--shadow-coral)"></div><div class="nm">coral</div></div>
+  </div>
+</body>
+</html>

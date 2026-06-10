@@ -1,0 +1,42 @@
+<!-- @dsCard group="Components" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Answer Bubbles</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../colors_and_type.css" rel="stylesheet">
+<style>
+  body { margin:0; font-family:var(--font-sans); background:var(--paper); color:var(--ink); padding:24px 28px; }
+  .kicker { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin:0 0 16px; }
+  .stack { display:flex; flex-direction:column; gap:14px; max-width:600px; }
+  .ans { display:flex; gap:12px; align-items:flex-start; }
+  .ans.them { flex-direction:row-reverse; }
+  .av { width:34px; height:34px; border-radius:999px; flex:0 0 auto; display:grid; place-items:center; font-weight:700; font-size:14px; color:#fff; }
+  .av.you { background:var(--coral); }
+  .av.them { background:var(--teal); }
+  .bubble { border-radius:18px; padding:13px 17px; font-size:15px; line-height:1.5; max-width:78%; }
+  .bubble.you { background:var(--coral-soft); border:1px solid var(--coral-line); border-bottom-left-radius:6px; }
+  .bubble.them { background:var(--teal-soft); border:1px solid var(--teal-line); border-bottom-right-radius:6px; }
+  .who { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.05em; margin-bottom:4px; }
+  .who.you { color:var(--coral-deep); }
+  .who.them { color:var(--teal-deep); }
+</style>
+</head>
+<body>
+  <p class="kicker">Answers — “you” coral, “them” teal</p>
+  <div class="stack">
+    <div class="ans">
+      <div class="av you">J</div>
+      <div class="bubble you"><div class="who you">You</div>Probably the morning we got lost hiking and found that quiet lake.</div>
+    </div>
+    <div class="ans them">
+      <div class="av them">A</div>
+      <div class="bubble them"><div class="who them">Alex</div>The night we stayed up talking until the sun came up. No question.</div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,49 @@
+<!-- @dsCard group="Colors" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brand — You & Them</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../colors_and_type.css" rel="stylesheet">
+<style>
+  body { margin:0; font-family:var(--font-sans); background:var(--surface); color:var(--ink); padding:24px; }
+  .kicker { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin:0 0 14px; }
+  .pair { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+  .label { font-size:12px; font-weight:600; margin:0 0 8px; display:flex; align-items:center; gap:7px; }
+  .dot { width:9px; height:9px; border-radius:999px; }
+  .row { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .sw { border-radius:var(--radius-sm); overflow:hidden; border:1px solid var(--line); }
+  .chip { height:48px; }
+  .meta { padding:6px 8px; }
+  .nm { font-size:11px; font-weight:600; }
+  .hex { font-family:var(--font-mono); font-size:10px; color:var(--ink-2); text-transform:uppercase; }
+</style>
+</head>
+<body>
+  <p class="kicker">Brand pair — two people, two colors</p>
+  <div class="pair">
+    <div>
+      <p class="label"><span class="dot" style="background:#EE6E4F"></span>Coral — “you”</p>
+      <div class="row">
+        <div class="sw"><div class="chip" style="background:#FCEAE2"></div><div class="meta"><div class="nm">Soft</div><div class="hex">#FCEAE2</div></div></div>
+        <div class="sw"><div class="chip" style="background:#F6C9B8"></div><div class="meta"><div class="nm">Line</div><div class="hex">#F6C9B8</div></div></div>
+        <div class="sw"><div class="chip" style="background:#EE6E4F"></div><div class="meta"><div class="nm">Coral</div><div class="hex">#EE6E4F</div></div></div>
+        <div class="sw"><div class="chip" style="background:#D6573A"></div><div class="meta"><div class="nm">Deep</div><div class="hex">#D6573A</div></div></div>
+      </div>
+    </div>
+    <div>
+      <p class="label"><span class="dot" style="background:#2F8079"></span>Teal — “them”</p>
+      <div class="row">
+        <div class="sw"><div class="chip" style="background:#E2EFEC"></div><div class="meta"><div class="nm">Soft</div><div class="hex">#E2EFEC</div></div></div>
+        <div class="sw"><div class="chip" style="background:#BCD9D3"></div><div class="meta"><div class="nm">Line</div><div class="hex">#BCD9D3</div></div></div>
+        <div class="sw"><div class="chip" style="background:#2F8079"></div><div class="meta"><div class="nm">Teal</div><div class="hex">#2F8079</div></div></div>
+        <div class="sw"><div class="chip" style="background:#246660"></div><div class="meta"><div class="nm">Deep</div><div class="hex">#246660</div></div></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

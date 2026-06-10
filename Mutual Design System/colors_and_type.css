@@ -1,0 +1,201 @@
+/* ============================================================
+   MUTUAL — Design System Foundations
+   colors_and_type.css
+
+   A web app where two people answer the same get-to-know-you
+   question. Aesthetic: soft editorial warmth — warm paper base,
+   generous air, the question set as a serif hero, and a
+   two-person color system (coral = "you", teal = "them").
+   ============================================================ */
+
+/* Brand families. These @imports pull the real @font-face rules for
+   Newsreader, Hanken Grotesk and DM Mono into the stylesheet closure.
+   (HTML files may ALSO keep their <link> tags — harmless duplication.) */
+@import url("https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&display=swap");
+
+:root {
+  /* ---------- BRAND PALETTE ---------- */
+
+  /* Paper / surfaces — warm ivory base, pure-white cards */
+  --paper:        #FBF8F3;   /* app background — warm ivory   */
+  --paper-2:      #F4EEE4;   /* sunken / secondary surfaces   */
+  --surface:      #FFFFFF;   /* cards, sheets, inputs         */
+  --surface-2:    #FCFAF6;   /* subtly raised surface         */
+
+  /* Ink — warm near-black, never pure #000 */
+  --ink:          #2A2622;   /* primary text & headings       */
+  --ink-2:        #6B6155;   /* secondary text, captions      */
+  --ink-3:        #9C9286;   /* tertiary text, placeholders   */
+  --ink-4:        #C4BAAC;   /* disabled, faint hints         */
+
+  /* Hairlines & borders — warm, low-contrast */
+  --line:         #ECE4D8;   /* default hairline border       */
+  --line-strong:  #DFD5C5;   /* emphasized border / divider   */
+
+  /* Primary — Coral ("you"). Warm, inviting, the action color */
+  --coral:        #EE6E4F;   /* primary actions, brand        */
+  --coral-deep:   #D6573A;   /* hover / pressed               */
+  --coral-soft:   #FCEAE2;   /* tinted fills, "you" bubbles   */
+  --coral-line:   #F6C9B8;   /* tinted borders                */
+
+  /* Secondary — Teal ("them"). The other person's color */
+  --teal:         #2F8079;   /* "them" accents, secondary     */
+  --teal-deep:    #246660;   /* hover / pressed               */
+  --teal-soft:    #E2EFEC;   /* tinted fills, "them" bubbles  */
+  --teal-line:    #BCD9D3;   /* tinted borders                */
+
+  /* Support — used sparingly */
+  --gold:         #E0A33C;   /* highlights, streaks, "match"  */
+  --gold-soft:    #FBF0DA;
+  --positive:     #3F9A6E;   /* success                       */
+  --positive-soft:#E4F2EA;
+  --danger:       #CF4B3E;   /* destructive                   */
+  --danger-soft:  #FBE6E3;
+
+  /* ---------- TYPE FAMILIES ---------- */
+  --font-serif:  "Newsreader", "Iowan Old Style", Georgia, serif;        /* questions, display */
+  --font-sans:   "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif; /* UI, body */
+  --font-mono:   "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;   /* labels, kickers, meta */
+
+  /* ---------- TYPE SCALE (fluid-friendly base = 16px) ---------- */
+  --text-xs:     0.75rem;   /* 12 — micro labels        */
+  --text-sm:     0.875rem;  /* 14 — captions, meta      */
+  --text-base:   1rem;      /* 16 — body                */
+  --text-md:     1.125rem;  /* 18 — lead body           */
+  --text-lg:     1.375rem;  /* 22 — small headings      */
+  --text-xl:     1.75rem;   /* 28 — section headings    */
+  --text-2xl:    2.25rem;   /* 36 — page titles         */
+  --text-3xl:    3rem;      /* 48 — question (sm)       */
+  --text-4xl:    3.75rem;   /* 60 — question (hero)     */
+  --text-5xl:    4.75rem;   /* 76 — splash display      */
+
+  --leading-tight:  1.12;
+  --leading-snug:   1.28;
+  --leading-normal: 1.5;
+  --leading-relaxed:1.7;
+
+  --tracking-tight: -0.02em;
+  --tracking-normal: 0em;
+  --tracking-wide:  0.04em;
+  --tracking-mono:  0.08em;  /* uppercase mono kickers */
+
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold:600;
+  --weight-bold:    700;
+
+  /* ---------- RADII ---------- */
+  --radius-xs:  6px;
+  --radius-sm:  10px;
+  --radius-md:  14px;   /* default — inputs, small cards */
+  --radius-lg:  20px;   /* cards, sheets */
+  --radius-xl:  28px;   /* hero question card */
+  --radius-pill:999px;  /* chips, buttons, avatars */
+
+  /* ---------- SPACING (4pt base) ---------- */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-8:  32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* ---------- SHADOWS — soft, warm-tinted, never harsh ---------- */
+  --shadow-xs:  0 1px 2px rgba(74, 58, 42, 0.05);
+  --shadow-sm:  0 2px 6px rgba(74, 58, 42, 0.06), 0 1px 2px rgba(74, 58, 42, 0.04);
+  --shadow-md:  0 8px 24px rgba(74, 58, 42, 0.08), 0 2px 6px rgba(74, 58, 42, 0.05);
+  --shadow-lg:  0 20px 48px rgba(74, 58, 42, 0.12), 0 4px 12px rgba(74, 58, 42, 0.06);
+  --shadow-coral: 0 8px 20px rgba(214, 87, 58, 0.24);
+  --ring-focus: 0 0 0 3px rgba(238, 110, 79, 0.28);
+
+  /* ---------- MOTION ---------- */
+  --ease-out:   cubic-bezier(0.22, 0.61, 0.36, 1);   /* @kind other */
+  --ease-soft:  cubic-bezier(0.32, 0.72, 0, 1);       /* @kind other */
+  --ease-spring:cubic-bezier(0.34, 1.46, 0.64, 1);    /* @kind other */
+  --dur-fast:   140ms;   /* @kind other */
+  --dur-base:   240ms;   /* @kind other */
+  --dur-slow:   420ms;   /* @kind other */
+}
+
+/* ============================================================
+   SEMANTIC ELEMENT STYLES
+   Apply to a scope by adding class="mutual" or use the vars.
+   ============================================================ */
+
+.mutual {
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--paper);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* The question — the hero of the product. Serif, warm, intimate. */
+.mutual .question {
+  font-family: var(--font-serif);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-4xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--ink);
+  text-wrap: balance;
+}
+
+.mutual h1, .mutual .h1 {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-2xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+}
+.mutual h2, .mutual .h2 {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-tight);
+}
+.mutual h3, .mutual .h3 {
+  font-family: var(--font-sans);
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-lg);
+  line-height: var(--leading-snug);
+}
+.mutual p, .mutual .body {
+  font-size: var(--text-base);
+  line-height: var(--leading-relaxed);
+  color: var(--ink);
+}
+.mutual .lead {
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
+  color: var(--ink-2);
+}
+.mutual .caption {
+  font-size: var(--text-sm);
+  color: var(--ink-2);
+  line-height: var(--leading-normal);
+}
+
+/* Mono kicker — small uppercase eyebrow label */
+.mutual .kicker {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-mono);
+  color: var(--ink-3);
+  font-weight: var(--weight-medium);
+}
+
+.mutual a { color: var(--coral-deep); text-decoration: none; }
+.mutual a:hover { text-decoration: underline; }

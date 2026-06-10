@@ -1,0 +1,6 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Mutual">
+  <circle cx="18.5" cy="24" r="12.5" fill="#EE6E4F"></circle>
+  <circle cx="29.5" cy="24" r="12.5" fill="#2F8079"></circle>
+  <clipPath id="mutual-lens"><circle cx="29.5" cy="24" r="12.5"></circle></clipPath>
+  <circle cx="18.5" cy="24" r="12.5" fill="#22524C" clip-path="url(#mutual-lens)"></circle>
+</svg>

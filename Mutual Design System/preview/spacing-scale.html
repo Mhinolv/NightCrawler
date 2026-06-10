@@ -1,0 +1,32 @@
+<!-- @dsCard group="Spacing" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spacing Scale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../colors_and_type.css" rel="stylesheet">
+<style>
+  body { margin:0; font-family:var(--font-sans); background:var(--surface); color:var(--ink); padding:24px 28px; }
+  .kicker { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin:0 0 16px; }
+  .row { display:flex; align-items:center; gap:14px; padding:5px 0; }
+  .bar { height:14px; background:var(--teal); border-radius:3px; }
+  .tag { font-family:var(--font-mono); font-size:11px; color:var(--ink-2); width:70px; }
+</style>
+</head>
+<body>
+  <p class="kicker">Spacing — 4pt base grid</p>
+  <div class="row"><span class="tag">1 · 4</span><div class="bar" style="width:4px"></div></div>
+  <div class="row"><span class="tag">2 · 8</span><div class="bar" style="width:8px"></div></div>
+  <div class="row"><span class="tag">3 · 12</span><div class="bar" style="width:12px"></div></div>
+  <div class="row"><span class="tag">4 · 16</span><div class="bar" style="width:16px"></div></div>
+  <div class="row"><span class="tag">6 · 24</span><div class="bar" style="width:24px"></div></div>
+  <div class="row"><span class="tag">8 · 32</span><div class="bar" style="width:32px"></div></div>
+  <div class="row"><span class="tag">12 · 48</span><div class="bar" style="width:48px"></div></div>
+  <div class="row"><span class="tag">16 · 64</span><div class="bar" style="width:64px"></div></div>
+  <div class="row"><span class="tag">20 · 80</span><div class="bar" style="width:80px"></div></div>
+</body>
+</html>

@@ -1,0 +1,38 @@
+<!-- @dsCard group="Brand" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Iconography</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../colors_and_type.css" rel="stylesheet">
+<style>
+  body { margin:0; font-family:var(--font-sans); background:var(--surface); color:var(--ink); padding:24px 28px; }
+  .kicker { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin:0 0 16px; }
+  .row { display:flex; align-items:center; gap:26px; flex-wrap:wrap; }
+  .ic { display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--ink); }
+  .ic span { font-size:11px; color:var(--ink-3); }
+  .note { margin-top:18px; font-size:13px; color:var(--ink-2); line-height:1.5; }
+  svg { stroke:var(--ink); }
+</style>
+</head>
+<body>
+  <p class="kicker">Iconography — Lucide · 1.75px stroke · rounded</p>
+  <div class="row" id="icons"></div>
+  <p class="note">Line icons only — never filled. Stroke matches text weight; corners stay rounded. Pair with <b>DM&nbsp;Mono</b> labels.</p>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    const names = ['messages-square','heart-handshake','shuffle','sparkles','users-round','calendar-heart','bell','send-horizontal'];
+    const wrap = document.getElementById('icons');
+    names.forEach(n => {
+      const d = document.createElement('div'); d.className='ic';
+      d.innerHTML = `<i data-lucide="${n}" style="width:26px;height:26px"></i><span>${n}</span>`;
+      wrap.appendChild(d);
+    });
+    lucide.createIcons({ attrs: { 'stroke-width': 1.75 } });
+  </script>
+</body>
+</html>

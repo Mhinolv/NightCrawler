@@ -1,0 +1,38 @@
+<!-- @dsCard group="Components" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Question Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../colors_and_type.css" rel="stylesheet">
+<style>
+  body { margin:0; font-family:var(--font-sans); background:var(--paper); color:var(--ink); padding:28px; }
+  .card { background:var(--surface); border-radius:var(--radius-xl); box-shadow:var(--shadow-md); padding:30px 34px; max-width:560px; }
+  .top { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .kicker { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); }
+  .pill { font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; color:var(--teal-deep); background:var(--teal-soft); border-radius:999px; padding:5px 11px; }
+  .q { font-family:var(--font-serif); font-weight:400; font-size:36px; line-height:1.16; letter-spacing:-0.02em; margin:0 0 24px; text-wrap:balance; }
+  .actions { display:flex; gap:10px; }
+  .btn { font-family:var(--font-sans); font-size:15px; font-weight:600; border:none; cursor:pointer; border-radius:999px; padding:11px 22px; }
+  .primary { background:var(--coral); color:#fff; box-shadow:var(--shadow-coral); }
+  .secondary { background:transparent; color:var(--ink-2); border:1.5px solid var(--line-strong); }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="top">
+      <span class="kicker">Question 14 of the week</span>
+      <span class="pill">Alex answered</span>
+    </div>
+    <p class="q">If you could keep only one memory forever, which would you choose?</p>
+    <div class="actions">
+      <button class="btn primary">Write my answer</button>
+      <button class="btn secondary">Shuffle</button>
+    </div>
+  </div>
+</body>
+</html>

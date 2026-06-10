@@ -1,0 +1,33 @@
+<!-- @dsCard group="Colors" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Support & Semantic</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../colors_and_type.css" rel="stylesheet">
+<style>
+  body { margin:0; font-family:var(--font-sans); background:var(--surface); color:var(--ink); padding:24px; }
+  .kicker { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin:0 0 14px; }
+  .row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .sw { display:flex; align-items:center; gap:12px; border:1px solid var(--line); border-radius:var(--radius-md); padding:10px 12px; }
+  .chip { width:40px; height:40px; border-radius:var(--radius-sm); flex:0 0 auto; }
+  .nm { font-size:13px; font-weight:600; }
+  .hex { font-family:var(--font-mono); font-size:11px; color:var(--ink-2); text-transform:uppercase; }
+</style>
+</head>
+<body>
+  <p class="kicker">Support &amp; semantic — used sparingly</p>
+  <div class="row">
+    <div class="sw"><div class="chip" style="background:#E0A33C"></div><div><div class="nm">Gold</div><div class="hex">#E0A33C</div></div></div>
+    <div class="sw"><div class="chip" style="background:#3F9A6E"></div><div><div class="nm">Positive</div><div class="hex">#3F9A6E</div></div></div>
+    <div class="sw"><div class="chip" style="background:#CF4B3E"></div><div><div class="nm">Danger</div><div class="hex">#CF4B3E</div></div></div>
+    <div class="sw"><div class="chip" style="background:#FBF0DA; border:1px solid var(--line)"></div><div><div class="nm">Gold soft</div><div class="hex">#FBF0DA</div></div></div>
+    <div class="sw"><div class="chip" style="background:#E4F2EA; border:1px solid var(--line)"></div><div><div class="nm">Positive soft</div><div class="hex">#E4F2EA</div></div></div>
+    <div class="sw"><div class="chip" style="background:#FBE6E3; border:1px solid var(--line)"></div><div><div class="nm">Danger soft</div><div class="hex">#FBE6E3</div></div></div>
+  </div>
+</body>
+</html>

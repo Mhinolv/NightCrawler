@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mutual — Web App (Print)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../../colors_and_type.css" rel="stylesheet">
+<link href="kit.css" rel="stylesheet">
+<style>
+  /* ---------- Print layout: one screen per page ---------- */
+  body { background: var(--paper); }
+  .print-page {
+    position: relative;
+    background: var(--paper);
+    padding: 0 0 48px;
+    break-after: page;
+  }
+  .print-page:last-child { break-after: auto; }
+  .print-page .screen-label {
+    font-family: var(--font-mono); font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--ink-3);
+    text-align: center; padding: 14px 0 0;
+  }
+  /* The two centered screens need a comfortable, non-viewport height in print flow */
+  .print-page .center-wrap { min-height: 0; padding: 40px 24px 8px; }
+  .print-page .center-block { display: grid; place-items: center; }
+
+  @media screen {
+    body { padding: 24px 0; }
+    .print-page { max-width: 1120px; margin: 0 auto 28px; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; box-shadow: var(--shadow-sm); }
+  }
+
+  @media print {
+    @page { size: portrait; margin: 1cm; }
+    html, body { background: #fff; }
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .topbar { position: static; }
+    .print-page { break-inside: avoid; box-shadow: none; border: none; }
+    .qcard, .answer-card, .qrow { break-inside: avoid; }
+    /* Freeze any animations at their end state */
+    *, *::before, *::after {
+      animation-delay: -99s !important; animation-duration: .001s !important;
+      animation-iteration-count: 1 !important; animation-fill-mode: both !important;
+      animation-play-state: running !important; transition-duration: 0s !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+
+<script type="text/babel" src="primitives.jsx"></script>
+<script type="text/babel" src="TopBar.jsx"></script>
+<script type="text/babel" src="QuestionCard.jsx"></script>
+<script type="text/babel" src="AnswerComposer.jsx"></script>
+<script type="text/babel" src="RevealPair.jsx"></script>
+<script type="text/babel" src="QuestionRow.jsx"></script>
+
+<script type="text/babel">
+/* Static, paged recreation of all three screens for PDF export. */
+const YOU = { name: 'You', initial: 'J' };
+const THEM = { name: 'Alex', initial: 'A' };
+
+const Q_HOME = "If you could keep only one memory forever, which would you <em>choose</em>?";
+const Q_TEXT_PLAIN = "If you could keep only one memory forever, which would you choose?";
+const YOUR_ANSWER = "The quiet ones — small, unremarkable evenings that turned out to matter most.";
+const THEIR_ANSWER = "The night we stayed up talking until the sun came up. No question.";
+
+const CATEGORIES = ['All', 'Deep', 'Playful', 'Past', 'Future'];
+const HISTORY = [
+  { text: "What does a perfect, ordinary Sunday look like to you?", answered: true },
+  { text: "Who taught you something you still carry with you?", answered: true },
+  { text: "What's a place you'd take me if you could?", answered: false },
+];
+
+function HomeScreen() {
+  return (
+    <div className="app">
+      <TopBar you={YOU} them={THEM} onHome={() => {}} />
+      <div className="page">
+        <div className="center-block" style={{ display: 'grid', placeItems: 'center', marginBottom: 8 }}>
+          <QuestionCard
+            question={Q_HOME}
+            them={THEM}
+            youAnswered={false}
+            themAnswered={true}
+            onAnswer={() => {}}
+            onShuffle={() => {}}
+          />
+        </div>
+        <div className="section-head">
+          <h2>Your questions</h2>
+          <PairAvatars you={YOU.initial} them={THEM.initial} size={30} />
+        </div>
+        <div className="chips" style={{ marginBottom: 18 }}>
+          {CATEGORIES.map((c) => (<Chip key={c} active={c === 'All'} onClick={() => {}}>{c}</Chip>))}
+        </div>
+        <div className="qlist">
+          {HISTORY.map((h, i) => (<QuestionRow key={i} q={h} them={THEM} onOpen={() => {}} />))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AnswerScreen() {
+  return (
+    <div className="app">
+      <TopBar you={YOU} them={THEM} onHome={() => {}} />
+      <div className="center-wrap">
+        <div className="composer">
+          <div className="btn btn-ghost" style={{ marginBottom: 14, marginLeft: -12, display: 'inline-flex' }}>
+            <Icon name="arrow-left" size={18} /> Back
+          </div>
+          <p className="kicker" style={{ marginBottom: 10 }}>Your answer · just between you two</p>
+          <p className="question" dangerouslySetInnerHTML={{ __html: Q_HOME }} />
+          <div className="answer-field" style={{ minHeight: 160 }}>{YOUR_ANSWER}</div>
+          <div className="composer-foot">
+            <span className="count">11 words</span>
+            <div className="btn btn-primary" style={{ display: 'inline-flex' }}>
+              <Icon name="send-horizontal" size={18} /> Send answer
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RevealScreen() {
+  return (
+    <div className="app">
+      <TopBar you={YOU} them={THEM} onHome={() => {}} />
+      <div className="center-wrap">
+        <RevealPair
+          question={Q_HOME}
+          you={YOU}
+          them={THEM}
+          yourAnswer={YOUR_ANSWER}
+          theirAnswer={THEIR_ANSWER}
+          onDone={() => {}}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PrintDoc() {
+  return (
+    <React.Fragment>
+      <div className="print-page"><div className="screen-label">Mutual · Home — the day’s question</div><HomeScreen /></div>
+      <div className="print-page"><div className="screen-label">Mutual · Answer — focused composer</div><AnswerScreen /></div>
+      <div className="print-page"><div className="screen-label">Mutual · Reveal — both answers</div><RevealScreen /></div>
+    </React.Fragment>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<PrintDoc />);
+
+// Auto-print once fonts + icons are ready.
+(function () {
+  function go() { setTimeout(() => window.print(), 600); }
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => requestAnimationFrame(go));
+  } else {
+    window.addEventListener('load', go);
+  }
+})();
+</script>
+</body>
+</html>

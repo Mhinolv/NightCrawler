@@ -1,0 +1,51 @@
+<!-- @dsCard group="Components" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chips, Badges & Pairs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="../colors_and_type.css" rel="stylesheet">
+<style>
+  body { margin:0; font-family:var(--font-sans); background:var(--surface); color:var(--ink); padding:24px 28px; }
+  .kicker { font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--ink-3); margin:0 0 14px; }
+  .row { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:18px; }
+  .chip { font-size:13px; font-weight:500; border-radius:999px; padding:7px 14px; border:1px solid var(--line-strong); background:var(--surface); color:var(--ink-2); }
+  .chip.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .chip.cat { background:var(--gold-soft); color:#9a6c14; border-color:#f0dcae; }
+  .badge { font-family:var(--font-mono); font-size:11px; letter-spacing:.04em; border-radius:999px; padding:4px 10px; }
+  .b-new { background:var(--coral-soft); color:var(--coral-deep); }
+  .b-done { background:var(--positive-soft); color:#2c7a52; }
+  .b-wait { background:var(--paper-2); color:var(--ink-2); }
+  .pair { display:flex; align-items:center; }
+  .av { width:38px; height:38px; border-radius:999px; display:grid; place-items:center; font-weight:700; color:#fff; font-size:15px; border:2.5px solid var(--surface); }
+  .av.you { background:var(--coral); }
+  .av.them { background:var(--teal); margin-left:-12px; }
+  .conn { font-size:13px; color:var(--ink-2); margin-left:10px; }
+</style>
+</head>
+<body>
+  <p class="kicker">Category chips</p>
+  <div class="row">
+    <span class="chip on">All</span>
+    <span class="chip">Deep</span>
+    <span class="chip">Playful</span>
+    <span class="chip">Past</span>
+    <span class="chip cat">★ Weekly</span>
+  </div>
+  <p class="kicker">Status badges</p>
+  <div class="row">
+    <span class="badge b-new">NEW</span>
+    <span class="badge b-done">BOTH ANSWERED</span>
+    <span class="badge b-wait">WAITING ON ALEX</span>
+  </div>
+  <p class="kicker">Paired avatars</p>
+  <div class="row">
+    <div class="pair"><div class="av you">J</div><div class="av them">A</div></div>
+    <span class="conn">Jordan &amp; Alex · paired 42 days</span>
+  </div>
+</body>
+</html>
