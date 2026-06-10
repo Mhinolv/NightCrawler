@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
     if (!stateName) return [];
     return keywords.map((keyword) => ({
       code,
-      query: `"${keyword}" ${stateName}`,
+      query: `${keyword} ${stateName}`,
     }));
   });
 

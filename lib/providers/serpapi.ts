@@ -5,13 +5,17 @@ interface SerpApiNewsResult {
   link?: string;
   source?: { name?: string } | string;
   date?: string;
+  iso_date?: string;
   snippet?: string;
 }
 
-function parseDate(date?: string): string {
-  if (!date) return new Date().toISOString();
-  const parsed = new Date(date);
-  return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+function parseDate(isoDate?: string, date?: string): string {
+  for (const candidate of [isoDate, date]) {
+    if (!candidate) continue;
+    const parsed = new Date(candidate);
+    if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
+  }
+  return new Date().toISOString();
 }
 
 export async function fetchFromSerpApi({
@@ -46,7 +50,7 @@ export async function fetchFromSerpApi({
       title: item.title!,
       link: item.link!,
       source: typeof item.source === "string" ? item.source : item.source?.name ?? "Unknown",
-      publishedAt: parseDate(item.date),
+      publishedAt: parseDate(item.iso_date, item.date),
       snippet: item.snippet,
     }));
 }
