@@ -101,3 +101,17 @@ export const RESULT_LIMITS: LimitOption[] = [
 ];
 
 export const DEFAULT_RESULT_LIMIT = 25;
+
+export type ProviderValue = "rss" | "serpapi";
+
+export interface ProviderOption {
+  value: ProviderValue;
+  label: string;
+}
+
+export const PROVIDER_OPTIONS: ProviderOption[] = [
+  { value: "rss", label: "Google News (RSS)" },
+  { value: "serpapi", label: "SerpAPI" },
+];
+
+export const DEFAULT_PROVIDER: ProviderValue = "rss";

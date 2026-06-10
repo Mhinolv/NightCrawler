@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { severityRank } from "@/lib/casualties";
-import { SortValue, US_STATES } from "@/lib/config";
+import { DEFAULT_PROVIDER, ProviderValue, SortValue, US_STATES } from "@/lib/config";
 import { dedupeArticles } from "@/lib/dedupe";
 import { extractArticleDetails } from "@/lib/extract";
-import { fetchArticles, RawArticle, TimeWindow } from "@/lib/providers";
+import { fetchArticles, NewsProvider, RawArticle, TimeWindow } from "@/lib/providers";
 import { Article, SearchRequest } from "@/lib/types";
 
 const VALID_WINDOWS: TimeWindow[] = ["1d", "3d", "7d"];
 const VALID_SORTS: SortValue[] = ["newest", "oldest", "severity"];
+const VALID_PROVIDERS: ProviderValue[] = ["rss", "serpapi"];
 
 /** Cap on how many deduped articles get sent to Claude per search, to bound cost/latency. */
 const MAX_EXTRACTION_CANDIDATES = 40;
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { states, keywords, window, sort = "newest", limit = 0 } = body;
+  const { states, keywords, window, sort = "newest", limit = 0, provider = DEFAULT_PROVIDER } = body;
 
   if (!Array.isArray(states) || states.length === 0) {
     return NextResponse.json({ error: "states must be a non-empty array" }, { status: 400 });
@@ -57,6 +58,15 @@ export async function POST(req: NextRequest) {
   if (typeof limit !== "number" || limit < 0) {
     return NextResponse.json({ error: "limit must be a non-negative number" }, { status: 400 });
   }
+  if (!VALID_PROVIDERS.includes(provider as ProviderValue)) {
+    return NextResponse.json(
+      { error: `provider must be one of: ${VALID_PROVIDERS.join(", ")}` },
+      { status: 400 }
+    );
+  }
+  if (provider === "serpapi" && !process.env.SERP_API_KEY) {
+    return NextResponse.json({ error: "SerpAPI is not configured" }, { status: 400 });
+  }
 
   const stateNameByCode = new Map(US_STATES.map((s) => [s.code, s.name]));
 
@@ -71,7 +81,10 @@ export async function POST(req: NextRequest) {
 
   const results = await Promise.allSettled(
     queries.map(async ({ code, query }) => {
-      const articles = await fetchArticles({ query, window: window as TimeWindow });
+      const articles = await fetchArticles(
+        { query, window: window as TimeWindow },
+        provider as NewsProvider
+      );
       return articles.map((article): StateRawArticle => ({ ...article, state: code }));
     })
   );

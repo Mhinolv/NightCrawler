@@ -3,13 +3,17 @@
 import { useState } from "react";
 import {
   DEFAULT_KEYWORDS,
+  DEFAULT_PROVIDER,
   DEFAULT_RESULT_LIMIT,
+  PROVIDER_OPTIONS,
+  ProviderValue,
   RESULT_LIMITS,
   SORT_OPTIONS,
   SortValue,
   TIME_WINDOWS,
   US_STATES,
 } from "@/lib/config";
+import StateDropdown from "./StateDropdown";
 
 export interface SearchParams {
   states: string[];
@@ -17,6 +21,7 @@ export interface SearchParams {
   window: string;
   sort: SortValue;
   limit: number;
+  provider: ProviderValue;
 }
 
 interface SearchSidebarProps {
@@ -62,12 +67,7 @@ export default function SearchSidebar({ onSearch, loading }: SearchSidebarProps)
   const [window, setWindow] = useState(TIME_WINDOWS[0].value);
   const [sort, setSort] = useState<SortValue>(SORT_OPTIONS[0].value);
   const [limit, setLimit] = useState(DEFAULT_RESULT_LIMIT);
-
-  function toggleState(code: string) {
-    setSelectedStates((prev) =>
-      prev.includes(code) ? prev.filter((s) => s !== code) : [...prev, code]
-    );
-  }
+  const [provider, setProvider] = useState<ProviderValue>(DEFAULT_PROVIDER);
 
   function toggleKeyword(keyword: string) {
     setSelectedKeywords((prev) =>
@@ -89,25 +89,15 @@ export default function SearchSidebar({ onSearch, loading }: SearchSidebarProps)
   }
 
   function handleSubmit() {
-    onSearch({ states: selectedStates, keywords: selectedKeywords, window, sort, limit });
+    onSearch({ states: selectedStates, keywords: selectedKeywords, window, sort, limit, provider });
   }
 
   return (
     <aside className="flex h-full w-80 shrink-0 flex-col gap-6 overflow-y-auto border-r border-line bg-surface px-6 py-6">
       <div>
         <Kicker>States</Kicker>
-        <div className="mt-3 max-h-56 overflow-y-auto rounded-md border border-line p-3">
-          <div className="flex flex-wrap gap-1.5">
-            {US_STATES.map((state) => (
-              <Chip
-                key={state.code}
-                active={selectedStates.includes(state.code)}
-                onClick={() => toggleState(state.code)}
-              >
-                {state.code}
-              </Chip>
-            ))}
-          </div>
+        <div className="mt-3">
+          <StateDropdown states={US_STATES} selected={selectedStates} onChange={setSelectedStates} />
         </div>
       </div>
 
@@ -197,6 +187,17 @@ export default function SearchSidebar({ onSearch, loading }: SearchSidebarProps)
         <div className="mt-3 flex flex-wrap gap-1.5">
           {RESULT_LIMITS.map((option) => (
             <Chip key={option.value} active={limit === option.value} onClick={() => setLimit(option.value)}>
+              {option.label}
+            </Chip>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Kicker>Search method</Kicker>
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {PROVIDER_OPTIONS.map((option) => (
+            <Chip key={option.value} active={provider === option.value} onClick={() => setProvider(option.value)}>
               {option.label}
             </Chip>
           ))}

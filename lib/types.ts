@@ -21,4 +21,6 @@ export interface SearchRequest {
   sort?: string;
   /** Max results to return. 0 or omitted means no limit. */
   limit?: number;
+  /** "rss" (default, free) or "serpapi". */
+  provider?: string;
 }
