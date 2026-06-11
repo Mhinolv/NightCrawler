@@ -1,6 +1,6 @@
 export type TimeWindow = "1d" | "3d" | "7d";
 
-export type NewsProvider = "rss" | "serpapi";
+export type NewsProvider = "rss" | "bing" | "gdelt";
 
 export interface FetchArticlesParams {
   /** Search query, e.g. `"18-wheeler accident" Texas` */

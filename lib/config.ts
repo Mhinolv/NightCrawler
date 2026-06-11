@@ -102,7 +102,7 @@ export const SORT_OPTIONS: SortOption[] = [
   { value: "severity", label: "Most severe first", short: "Severity" },
 ];
 
-export type ProviderValue = "rss" | "serpapi";
+export type ProviderValue = "rss" | "bing" | "gdelt";
 
 export interface ProviderOption {
   value: ProviderValue;
@@ -111,8 +111,9 @@ export interface ProviderOption {
 }
 
 export const PROVIDER_OPTIONS: ProviderOption[] = [
-  { value: "rss", label: "Google News (RSS)", short: "RSS" },
-  { value: "serpapi", label: "Bing News (SerpAPI)", short: "SerpAPI" },
+  { value: "rss", label: "Google News (RSS)", short: "Google" },
+  { value: "bing", label: "Bing News (RSS)", short: "Bing" },
+  { value: "gdelt", label: "GDELT", short: "GDELT" },
 ];
 
 export const DEFAULT_PROVIDER: ProviderValue = "rss";

@@ -28,8 +28,8 @@ function TargetIcon() {
 }
 
 export default function Home() {
-  const [states, setStates] = useState<string[]>(US_STATES.map((s) => s.code));
-  const [keywords, setKeywords] = useState<string[]>([...DEFAULT_KEYWORDS]);
+  const [states, setStates] = useState<string[]>(["TX"]);
+  const [keywords, setKeywords] = useState<string[]>([DEFAULT_KEYWORDS[0]]);
   const [customKeywords, setCustomKeywords] = useState<string[]>([]);
   const [window, setWindow] = useState(TIME_WINDOWS[0].value);
   const [sort, setSort] = useState<SortValue>(SORT_OPTIONS[0].value);

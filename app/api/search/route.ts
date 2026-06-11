@@ -8,7 +8,7 @@ import { Article, SearchRequest } from "@/lib/types";
 
 const VALID_WINDOWS: TimeWindow[] = ["1d", "3d", "7d"];
 const VALID_SORTS: SortValue[] = ["newest", "oldest", "severity"];
-const VALID_PROVIDERS: ProviderValue[] = ["rss", "serpapi"];
+const VALID_PROVIDERS: ProviderValue[] = ["rss", "bing", "gdelt"];
 
 /** Cap on how many deduped articles get sent to Claude per search, to bound cost/latency. */
 const MAX_EXTRACTION_CANDIDATES = 75;
@@ -63,9 +63,6 @@ export async function POST(req: NextRequest) {
       { error: `provider must be one of: ${VALID_PROVIDERS.join(", ")}` },
       { status: 400 }
     );
-  }
-  if (provider === "serpapi" && !process.env.SERP_API_KEY) {
-    return NextResponse.json({ error: "SerpAPI is not configured" }, { status: 400 });
   }
 
   const stateNameByCode = new Map(US_STATES.map((s) => [s.code, s.name]));
