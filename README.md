@@ -71,6 +71,13 @@ in-memory scan log → `GET /api/search/[scanId]/stream` tails the log as NDJSON
      RSS endpoints.
 4. Copy the source's signing secret into `HOOKDECK_SIGNING_SECRET`.
 
+For local testing, `hookdeck listen 3000 <source> --path /api/jobs/search`
+tunnels deliveries to the dev server — but note HookDeck does **not** apply
+delivery rate limits to CLI destinations (they're test-only), so queued
+events arrive immediately. Rate pacing only takes effect on the deployed
+HTTP destination. Per-minute rates are evenly spread (12/minute = exactly
+one delivery every 5 seconds).
+
 Note: scan state lives in process memory, so the app must run as a single
 long-lived Node server (`next start` on Railway/Fly/Render/VPS) — not on
 serverless. HookDeck retries are intentionally unused: a failed query is
