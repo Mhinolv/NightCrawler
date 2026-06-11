@@ -1,21 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
-import { severityRank } from "@/lib/casualties";
 import { DEFAULT_PROVIDER, ProviderValue, SortValue, US_STATES } from "@/lib/config";
-import { dedupeArticles } from "@/lib/dedupe";
+import { normalizeTitle } from "@/lib/dedupe";
 import { extractArticleDetails } from "@/lib/extract";
-import { fetchArticles, NewsProvider, RawArticle, TimeWindow } from "@/lib/providers";
-import { Article, SearchRequest } from "@/lib/types";
+import { fetchArticles, NewsProvider, TimeWindow } from "@/lib/providers";
+import { Article, SearchMeta, SearchRequest, SearchStreamEvent } from "@/lib/types";
 
 const VALID_WINDOWS: TimeWindow[] = ["1d", "3d", "7d"];
 const VALID_SORTS: SortValue[] = ["newest", "oldest", "severity"];
 const VALID_PROVIDERS: ProviderValue[] = ["rss", "bing", "gdelt"];
 
-/** Cap on how many deduped articles get sent to Claude per search, to bound cost/latency. */
+/** Cap on how many deduped articles get sent to Claude per scan, to bound cost/latency. */
 const MAX_EXTRACTION_CANDIDATES = 75;
 
-interface StateRawArticle extends RawArticle {
-  state: string;
-}
+/** GDELT enforces roughly one request per 5 seconds per IP. */
+const GDELT_THROTTLE_MS = 5000;
 
 /** Drops placeholder values (e.g. "unknown", "n/a") the model sometimes returns. */
 function cleanField(value?: string): string | undefined {
@@ -35,7 +33,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  const { states, keywords, window, sort = "newest", limit = 0, provider = DEFAULT_PROVIDER } = body;
+  const { states, keywords, window, sort = "newest", provider = DEFAULT_PROVIDER } = body;
 
   if (!Array.isArray(states) || states.length === 0) {
     return NextResponse.json({ error: "states must be a non-empty array" }, { status: 400 });
@@ -55,9 +53,6 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  if (typeof limit !== "number" || limit < 0) {
-    return NextResponse.json({ error: "limit must be a non-negative number" }, { status: 400 });
-  }
   if (!VALID_PROVIDERS.includes(provider as ProviderValue)) {
     return NextResponse.json(
       { error: `provider must be one of: ${VALID_PROVIDERS.join(", ")}` },
@@ -76,98 +71,111 @@ export async function POST(req: NextRequest) {
     }));
   });
 
-  const results = await Promise.allSettled(
-    queries.map(async ({ code, query }) => {
-      const articles = await fetchArticles(
-        { query, window: window as TimeWindow },
-        provider as NewsProvider
-      );
-      return articles.map((article): StateRawArticle => ({ ...article, state: code }));
-    })
-  );
+  const encoder = new TextEncoder();
 
-  const queryDebug = results.map((result, i) => ({
-    state: queries[i].code,
-    query: queries[i].query,
-    ...(result.status === "fulfilled"
-      ? { count: result.value.length }
-      : { error: result.reason instanceof Error ? result.reason.message : String(result.reason) }),
-  }));
-
-  for (const entry of queryDebug) {
-    if ("error" in entry) {
-      console.error(`[search] (${provider}) "${entry.query}" failed: ${entry.error}`);
-    } else {
-      console.log(`[search] (${provider}) "${entry.query}" -> ${entry.count} result(s)`);
-    }
-  }
-
-  const rawArticles = results
-    .filter((r): r is PromiseFulfilledResult<StateRawArticle[]> => r.status === "fulfilled")
-    .flatMap((r) => r.value);
-
-  const dedupedAll = dedupeArticles(rawArticles).sort(
-    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
-  );
-  const deduped = dedupedAll.slice(0, MAX_EXTRACTION_CANDIDATES);
-
-  const extractionInputs = deduped.map((article, index) => ({
-    id: String(index),
-    title: article.title,
-    source: article.source,
-    snippet: article.snippet,
-  }));
-
-  const extractions = await extractArticleDetails(extractionInputs);
-  const extractionById = new Map(extractions.map((e) => [e.id, e]));
-
-  const articles: Article[] = deduped
-    .map((raw, index) => {
-      const extraction = extractionById.get(String(index));
-      if (!extraction || !extraction.relevant) return null;
-
-      const article: Article = {
-        id: String(index),
-        headline: raw.title,
-        url: raw.link,
-        source: raw.source,
-        publishedAt: raw.publishedAt,
-        state: raw.state,
-        location: cleanField(extraction.location),
-        vehicleType: extraction.vehicleType,
-        casualties: cleanField(extraction.casualties),
-        summary: cleanField(extraction.summary),
-      };
-      return article;
-    })
-    .filter((a): a is Article => a !== null)
-    .sort((a, b) => {
-      switch (sort as SortValue) {
-        case "oldest":
-          return new Date(a.publishedAt).getTime() - new Date(b.publishedAt).getTime();
-        case "severity": {
-          const rankDiff = severityRank(a.casualties) - severityRank(b.casualties);
-          if (rankDiff !== 0) return rankDiff;
-          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-        }
-        case "newest":
-        default:
-          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      function send(event: SearchStreamEvent) {
+        controller.enqueue(encoder.encode(`${JSON.stringify(event)}\n`));
       }
-    });
 
-  const limited = limit > 0 ? articles.slice(0, limit) : articles;
+      const seenTitles = new Set<string>();
+      const queryDebug: SearchMeta["queries"] = [];
+      let nextId = 0;
+      let totalFetched = 0;
+      let totalUnique = 0;
+      let totalScanned = 0;
+      let lastGdeltRequestAt = 0;
 
-  return NextResponse.json({
-    articles: limited,
-    total: articles.length,
-    meta: {
-      provider,
-      queries: queryDebug,
-      totalFetched: rawArticles.length,
-      totalUnique: dedupedAll.length,
-      totalScanned: deduped.length,
-      truncated: dedupedAll.length > MAX_EXTRACTION_CANDIDATES,
+      for (let i = 0; i < queries.length; i++) {
+        const { code, query } = queries[i];
+        send({ type: "query", state: code, query, index: i, total: queries.length });
+
+        if (provider === "gdelt") {
+          const wait = GDELT_THROTTLE_MS - (Date.now() - lastGdeltRequestAt);
+          if (lastGdeltRequestAt > 0 && wait > 0) {
+            await new Promise((resolve) => setTimeout(resolve, wait));
+          }
+          lastGdeltRequestAt = Date.now();
+        }
+
+        try {
+          const raw = await fetchArticles({ query, window: window as TimeWindow }, provider as NewsProvider);
+          totalFetched += raw.length;
+
+          const newRaw = raw.filter((article) => {
+            const key = normalizeTitle(article.title);
+            if (seenTitles.has(key)) return false;
+            seenTitles.add(key);
+            return true;
+          });
+          totalUnique += newRaw.length;
+
+          const remainingCapacity = Math.max(0, MAX_EXTRACTION_CANDIDATES - totalScanned);
+          const toExtract = newRaw.slice(0, remainingCapacity);
+          totalScanned += toExtract.length;
+
+          const extractions = await extractArticleDetails(
+            toExtract.map((article, index) => ({
+              id: String(index),
+              title: article.title,
+              source: article.source,
+              snippet: article.snippet,
+            }))
+          );
+          const extractionById = new Map(extractions.map((e) => [e.id, e]));
+
+          const articles: Article[] = toExtract
+            .map((raw, index) => {
+              const extraction = extractionById.get(String(index));
+              if (!extraction || !extraction.relevant) return null;
+
+              const article: Article = {
+                id: String(nextId++),
+                headline: raw.title,
+                url: raw.link,
+                source: raw.source,
+                publishedAt: raw.publishedAt,
+                state: code,
+                location: cleanField(extraction.location),
+                vehicleType: extraction.vehicleType,
+                casualties: cleanField(extraction.casualties),
+                summary: cleanField(extraction.summary),
+              };
+              return article;
+            })
+            .filter((a): a is Article => a !== null);
+
+          send({ type: "articles", articles, state: code, query });
+          queryDebug.push({ state: code, query, count: raw.length });
+          console.log(`[search] (${provider}) "${query}" -> ${raw.length} result(s)`);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          queryDebug.push({ state: code, query, error: message });
+          send({ type: "error", state: code, query, error: message });
+          console.error(`[search] (${provider}) "${query}" failed: ${message}`);
+        }
+      }
+
+      send({
+        type: "done",
+        meta: {
+          provider,
+          queries: queryDebug,
+          totalFetched,
+          totalUnique,
+          totalScanned,
+          truncated: totalUnique > MAX_EXTRACTION_CANDIDATES,
+        },
+      });
+      controller.close();
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      "Content-Type": "application/x-ndjson",
+      "Cache-Control": "no-cache",
     },
   });
 }

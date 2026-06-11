@@ -1,6 +1,6 @@
 import { RawArticle } from "./providers/types";
 
-function normalizeTitle(title: string): string {
+export function normalizeTitle(title: string): string {
   return title
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, " ")

@@ -15,7 +15,8 @@ import {
   TIME_WINDOWS,
   US_STATES,
 } from "@/lib/config";
-import { Article, SearchResponse } from "@/lib/types";
+import { SORT_COMPARATORS } from "@/lib/sort";
+import { Article, SearchMeta, SearchStreamEvent } from "@/lib/types";
 
 function TargetIcon() {
   return (
@@ -25,6 +26,13 @@ function TargetIcon() {
       <circle cx="12" cy="12" r="1.2" fill="currentColor" />
     </svg>
   );
+}
+
+interface CurrentQuery {
+  state: string;
+  query: string;
+  index: number;
+  total: number;
 }
 
 export default function Home() {
@@ -37,11 +45,11 @@ export default function Home() {
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter[]>([]);
 
   const [results, setResults] = useState<Article[] | null>(null);
-  const [total, setTotal] = useState(0);
-  const [meta, setMeta] = useState<SearchResponse["meta"] | null>(null);
+  const [meta, setMeta] = useState<SearchMeta | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [currentQuery, setCurrentQuery] = useState<CurrentQuery | null>(null);
 
   function toggleKeyword(keyword: string) {
     setKeywords((prev) => (prev.includes(keyword) ? prev.filter((k) => k !== keyword) : [...prev, keyword]));
@@ -61,6 +69,9 @@ export default function Home() {
     setLoading(true);
     setHasSearched(true);
     setError(null);
+    setResults([]);
+    setMeta(null);
+    setCurrentQuery(null);
 
     try {
       const response = await fetch("/api/search", {
@@ -73,26 +84,51 @@ export default function Home() {
         const body = await response.json().catch(() => null);
         throw new Error(body?.error || `Search failed (${response.status})`);
       }
+      if (!response.body) throw new Error("No response body");
 
-      const data: SearchResponse = await response.json();
-      setResults(data.articles);
-      setTotal(data.total);
-      setMeta(data.meta);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      const accumulated: Article[] = [];
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const event: SearchStreamEvent = JSON.parse(line);
+          if (event.type === "query") {
+            setCurrentQuery(event);
+          } else if (event.type === "articles") {
+            if (event.articles.length > 0) {
+              accumulated.push(...event.articles);
+              setResults([...accumulated]);
+            }
+          } else if (event.type === "done") {
+            setMeta(event.meta);
+          }
+        }
+      }
     } catch (err) {
-      setResults(null);
-      setTotal(0);
-      setMeta(null);
       setError(err instanceof Error ? err.message : "Search failed");
     } finally {
       setLoading(false);
+      setCurrentQuery(null);
     }
   }
 
   const filteredResults = useMemo(() => {
     if (!results) return null;
-    if (severityFilter.length === 0) return results;
-    return results.filter((article) => severityFilter.includes(getSeverity(article.casualties) as SeverityFilter));
-  }, [results, severityFilter]);
+    const filtered =
+      severityFilter.length === 0
+        ? results
+        : results.filter((article) => severityFilter.includes(getSeverity(article.casualties) as SeverityFilter));
+    return [...filtered].sort(SORT_COMPARATORS[sort]);
+  }, [results, severityFilter, sort]);
 
   const fatalCount = useMemo(
     () => (results ?? []).filter((a) => getSeverity(a.casualties) === "fatal").length,
@@ -107,6 +143,7 @@ export default function Home() {
   const windowLabel = TIME_WINDOWS.find((w) => w.value === window)?.short ?? window;
   const sortLabel = SORT_OPTIONS.find((s) => s.value === sort)?.short ?? sort;
   const methodLabel = PROVIDER_OPTIONS.find((p) => p.value === provider)?.short ?? provider;
+  const total = (results ?? []).length;
 
   return (
     <div className="flex h-screen flex-col bg-paper">
@@ -124,18 +161,22 @@ export default function Home() {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-2 font-mono text-xs uppercase tracking-mono text-ink-3">
+          <span className="flex items-center gap-2 truncate font-mono text-xs uppercase tracking-mono text-ink-3">
             <span
-              className={`size-2 rounded-full ${loading ? "animate-pulse bg-positive" : "bg-ink-4"}`}
+              className={`size-2 shrink-0 rounded-full ${loading ? "animate-pulse bg-positive" : "bg-ink-4"}`}
               aria-hidden
             />
-            {loading ? "Scanning" : "Idle"}
+            {loading && currentQuery
+              ? `Searching ${currentQuery.state}: "${currentQuery.query}" (${currentQuery.index + 1}/${currentQuery.total})`
+              : loading
+                ? "Scanning"
+                : "Idle"}
           </span>
           <button
             type="button"
             onClick={handleSearch}
             disabled={!canSearch}
-            className="rounded-md bg-coral px-5 py-2 text-sm font-semibold font-mono uppercase tracking-mono text-surface shadow-[0_8px_20px_rgba(239,68,68,0.24)] transition-colors hover:bg-coral-deep disabled:cursor-not-allowed disabled:bg-surface-2 disabled:text-ink-4 disabled:shadow-none"
+            className="shrink-0 rounded-md bg-coral px-5 py-2 text-sm font-semibold font-mono uppercase tracking-mono text-surface shadow-[0_8px_20px_rgba(239,68,68,0.24)] transition-colors hover:bg-coral-deep disabled:cursor-not-allowed disabled:bg-surface-2 disabled:text-ink-4 disabled:shadow-none"
           >
             {loading ? "Scanning…" : "Run scan"}
           </button>
@@ -168,7 +209,11 @@ export default function Home() {
           </div>
         )}
 
-        {hasSearched && loading && (
+        {hasSearched && !error && filteredResults && filteredResults.length > 0 && (
+          <ResultsTable articles={filteredResults} />
+        )}
+
+        {hasSearched && !error && loading && (!filteredResults || filteredResults.length === 0) && (
           <div className="flex flex-col items-center justify-center py-24 font-mono text-sm uppercase tracking-mono text-ink-3">
             Scanning for today&apos;s articles…
           </div>
@@ -187,13 +232,9 @@ export default function Home() {
             <p className="mt-1 text-sm">Try a different state, severity filter, or widen the date window.</p>
           </div>
         )}
-
-        {hasSearched && !loading && !error && filteredResults && filteredResults.length > 0 && (
-          <ResultsTable articles={filteredResults} />
-        )}
       </main>
 
-      {hasSearched && !loading && !error && meta && (
+      {hasSearched && !error && meta && (
         <footer className="flex shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-1 border-t border-line bg-surface px-6 py-2 font-mono text-xs uppercase tracking-mono text-ink-3">
           <span>
             {(filteredResults ?? []).length} of {total} articles · Method — {methodLabel} · Window — {windowLabel} ·
