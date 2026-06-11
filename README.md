@@ -13,13 +13,19 @@ with one page checked over coffee.
   news fetching and LLM calls server-side, keeping API keys off the client and
   avoiding CORS.
 - **News provider interface** — all fetching goes through a single
-  `fetchArticles(query, window)` interface with two implementations:
-  - **Google News RSS (default, free)** — best local-outlet coverage, no key.
-  - **SerpAPI Google News engine (fallback)** — same Google index, but with an
-    SLA; kicks in on rate-limit errors or via env flag. Pay-per-search, cheap
-    at this volume (~500 searches/month).
-  - **GDELT DOC 2.0 (later, supplementary)** — free; catches wire/broadcast
-    items Google ranks poorly.
+  `fetchArticles(query, window)` interface with three free, keyless
+  implementations the user picks between in the UI:
+  - **Google News RSS (default)** — best local-outlet coverage.
+  - **Bing News RSS** — independent index; good fallback when Google
+    rate-limits the server's IP.
+  - **GDELT DOC 2.0** — catches wire/broadcast items the others rank poorly;
+    hard-limited to ~1 request per 5 seconds per IP.
+- **HookDeck queue** — searches are published as one event per state×keyword
+  query to a HookDeck Source; HookDeck delivers them back to
+  `/api/jobs/search` at a controlled rate (slow lane for GDELT, fast lane for
+  the RSS providers). Results stream to the browser as each job lands. When
+  `HOOKDECK_SOURCE_URL` is unset (local dev), the queue is worked in-process
+  instead.
 - **Claude API (Haiku)** — one batched call per search turns titles + snippets
   into structured JSON (location, vehicle type, casualties, summary) and filters
   false positives (lawyer ads, metaphorical uses). The filtering quality *is*
@@ -31,20 +37,44 @@ with one page checked over coffee.
 
 ## Architecture
 
-UI → `/api/search` → provider interface (RSS → SerpAPI fallback) → dedupe by
-normalized title + URL → Claude extraction (relevance filter + detail JSON) →
-card grid.
+UI → `POST /api/search` (creates a scan, queues one HookDeck event per
+state×keyword query) → HookDeck delivers each event to `POST /api/jobs/search`
+(provider fetch → dedupe → Claude extraction) → results append to an
+in-memory scan log → `GET /api/search/[scanId]/stream` tails the log as NDJSON
+→ table rows appear as each query lands.
 
-1. **Search API route** (`/api/search`) — takes `{ states[], keywords[],
-   window }`, builds a query per state×keyword pair, fetches in parallel,
-   parses, de-duplicates, sorts by publish date.
-2. **Extraction step** — deduped list goes to Claude in a single prompt
-   returning per-article `{ relevant, location, vehicle_type, casualties,
-   summary }`. Irrelevant items are dropped before the UI.
-3. **UI** — sidebar with state multi-select, keyword toggles (truck driver /
-   18-wheeler / service vehicle + free-text custom terms), date-window picker;
-   main pane of result cards with headline → original article link, source,
-   time, and detail chips.
+1. **Start scan** (`POST /api/search`) — takes `{ states[], keywords[],
+   window, provider }`, creates an in-memory scan, publishes one event per
+   state×keyword query to the HookDeck Source URL, and returns
+   `{ scanId, total }`. Without `HOOKDECK_SOURCE_URL`, queries are processed
+   in-process sequentially (GDELT paced to 1-per-5s).
+2. **Job handler** (`POST /api/jobs/search`) — HookDeck delivery target
+   (signature-verified). Fetches one query from the selected provider, dedupes
+   against the scan, runs Claude extraction (`{ relevant, location,
+   vehicle_type, casualties, summary }`), and appends results to the scan.
+3. **Result stream** (`GET /api/search/[scanId]/stream`) — NDJSON stream of
+   `query` / `articles` / `error` / `done` events; closes when every queued
+   query has settled.
+4. **UI** — filter bar (states, keywords, window, severity, sort, provider),
+   live progress in the header showing the in-flight query and settled count,
+   results table that grows as jobs finish.
+
+### HookDeck setup (deployed)
+
+1. Create a **Source** (e.g. `nightcrawler-scans`); put its URL in
+   `HOOKDECK_SOURCE_URL`.
+2. Create a **Destination** pointing at `https://<your-app>/api/jobs/search`.
+3. Create two **Connections** from the source to that destination:
+   - filter `body.provider == "gdelt"` → delivery rate **1 per 5 seconds**
+     (GDELT's hard per-IP limit);
+   - everything else → a faster rate (e.g. 5/second) to stay polite with the
+     RSS endpoints.
+4. Copy the source's signing secret into `HOOKDECK_SIGNING_SECRET`.
+
+Note: scan state lives in process memory, so the app must run as a single
+long-lived Node server (`next start` on Railway/Fly/Render/VPS) — not on
+serverless. HookDeck retries are intentionally unused: a failed query is
+recorded on the scan and the scan completes without it.
 
 Keywords live in editable config, not hardcoded — expect tuning in week one.
 

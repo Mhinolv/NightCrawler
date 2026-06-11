@@ -17,10 +17,15 @@ export interface SearchRequest {
   states: string[];
   keywords: string[];
   window: string;
-  /** "newest" (default), "oldest", or "severity" (most severe first). */
-  sort?: string;
   /** "rss" (default), "bing", or "gdelt" — all free. */
   provider?: string;
+}
+
+/** Response from POST /api/search: the scan was queued, stream results by id. */
+export interface StartScanResponse {
+  scanId: string;
+  /** Number of state×keyword queries queued. */
+  total: number;
 }
 
 export interface SearchMeta {
@@ -36,9 +41,10 @@ export interface SearchMeta {
   truncated: boolean;
 }
 
-/** Newline-delimited JSON events streamed from POST /api/search. */
+/** Newline-delimited JSON events streamed from GET /api/search/[scanId]/stream. */
 export type SearchStreamEvent =
   | { type: "query"; state: string; query: string; index: number; total: number }
   | { type: "articles"; articles: Article[]; state: string; query: string }
   | { type: "error"; state: string; query: string; error: string }
+  | { type: "ping" }
   | { type: "done"; meta: SearchMeta };

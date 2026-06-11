@@ -16,7 +16,7 @@ import {
   US_STATES,
 } from "@/lib/config";
 import { SORT_COMPARATORS } from "@/lib/sort";
-import { Article, SearchMeta, SearchStreamEvent } from "@/lib/types";
+import { Article, SearchMeta, SearchStreamEvent, StartScanResponse } from "@/lib/types";
 
 function TargetIcon() {
   return (
@@ -31,7 +31,10 @@ function TargetIcon() {
 interface CurrentQuery {
   state: string;
   query: string;
-  index: number;
+}
+
+interface ScanProgress {
+  settled: number;
   total: number;
 }
 
@@ -50,6 +53,7 @@ export default function Home() {
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentQuery, setCurrentQuery] = useState<CurrentQuery | null>(null);
+  const [progress, setProgress] = useState<ScanProgress | null>(null);
 
   function toggleKeyword(keyword: string) {
     setKeywords((prev) => (prev.includes(keyword) ? prev.filter((k) => k !== keyword) : [...prev, keyword]));
@@ -72,23 +76,32 @@ export default function Home() {
     setResults([]);
     setMeta(null);
     setCurrentQuery(null);
+    setProgress(null);
 
     try {
-      const response = await fetch("/api/search", {
+      const startResponse = await fetch("/api/search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ states, keywords, window, sort, provider }),
+        body: JSON.stringify({ states, keywords, window, provider }),
       });
 
-      if (!response.ok) {
-        const body = await response.json().catch(() => null);
-        throw new Error(body?.error || `Search failed (${response.status})`);
+      if (!startResponse.ok) {
+        const body = await startResponse.json().catch(() => null);
+        throw new Error(body?.error || `Search failed (${startResponse.status})`);
       }
-      if (!response.body) throw new Error("No response body");
+
+      const { scanId, total }: StartScanResponse = await startResponse.json();
+      setProgress({ settled: 0, total });
+
+      const response = await fetch(`/api/search/${scanId}/stream`);
+      if (!response.ok || !response.body) {
+        throw new Error(`Result stream failed (${response.status})`);
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let settled = 0;
       const accumulated: Article[] = [];
 
       while (true) {
@@ -104,10 +117,15 @@ export default function Home() {
           if (event.type === "query") {
             setCurrentQuery(event);
           } else if (event.type === "articles") {
+            settled++;
+            setProgress({ settled, total });
             if (event.articles.length > 0) {
               accumulated.push(...event.articles);
               setResults([...accumulated]);
             }
+          } else if (event.type === "error") {
+            settled++;
+            setProgress({ settled, total });
           } else if (event.type === "done") {
             setMeta(event.meta);
           }
@@ -118,6 +136,7 @@ export default function Home() {
     } finally {
       setLoading(false);
       setCurrentQuery(null);
+      setProgress(null);
     }
   }
 
@@ -167,7 +186,7 @@ export default function Home() {
               aria-hidden
             />
             {loading && currentQuery
-              ? `Searching ${currentQuery.state}: "${currentQuery.query}" (${currentQuery.index + 1}/${currentQuery.total})`
+              ? `Searching ${currentQuery.state}: "${currentQuery.query}"${progress ? ` · ${progress.settled}/${progress.total} done` : ""}`
               : loading
                 ? "Scanning"
                 : "Idle"}
@@ -242,6 +261,8 @@ export default function Home() {
           </span>
           <span>
             Fatal: {fatalCount} · Injury: {injuryCount} · Scanned {meta.totalScanned}
+            {meta.queries.some((q) => q.error) &&
+              ` · Failed queries: ${meta.queries.filter((q) => q.error).length}`}
           </span>
         </footer>
       )}
