@@ -1,21 +1,44 @@
-import { FetchArticlesParams, RawArticle } from "./types";
+import { FetchArticlesParams, RawArticle, TimeWindow } from "./types";
 
-interface SerpApiNewsResult {
+interface BingNewsResult {
   title?: string;
   link?: string;
-  source?: { name?: string } | string;
+  source?: string;
   date?: string;
-  iso_date?: string;
   snippet?: string;
 }
 
-function parseDate(isoDate?: string, date?: string): string {
-  for (const candidate of [isoDate, date]) {
-    if (!candidate) continue;
-    const parsed = new Date(candidate);
-    if (!Number.isNaN(parsed.getTime())) return parsed.toISOString();
+/** Bing News freshness filter codes: 7 = past day, 8 = past week. Bing has no 3-day option. */
+const FRESHNESS_BY_WINDOW: Record<TimeWindow, string> = {
+  "1d": "7",
+  "3d": "8",
+  "7d": "8",
+};
+
+const RELATIVE_DATE_UNIT_MS: Record<string, number> = {
+  min: 60_000,
+  m: 60_000,
+  h: 3_600_000,
+  d: 86_400_000,
+  w: 7 * 86_400_000,
+  mon: 30 * 86_400_000,
+  y: 365 * 86_400_000,
+};
+
+/** Parses Bing's relative date strings (e.g. "14m", "3h", "5d") into ISO timestamps. */
+function parseRelativeDate(value?: string): string {
+  const now = Date.now();
+  if (!value) return new Date(now).toISOString();
+
+  const match = value.trim().match(/^(\d+)\s*(min|mon|h|d|w|y|m)$/i);
+  if (match) {
+    const amount = Number(match[1]);
+    const unitMs = RELATIVE_DATE_UNIT_MS[match[2].toLowerCase()];
+    return new Date(now - amount * unitMs).toISOString();
   }
-  return new Date().toISOString();
+
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? new Date(now).toISOString() : parsed.toISOString();
 }
 
 export async function fetchFromSerpApi({
@@ -28,10 +51,10 @@ export async function fetchFromSerpApi({
   }
 
   const params = new URLSearchParams({
-    engine: "google_news",
-    q: `${query} when:${window}`,
-    hl: "en",
-    gl: "us",
+    engine: "bing_news",
+    q: query,
+    cc: "us",
+    qft: `interval="${FRESHNESS_BY_WINDOW[window]}"`,
     api_key: apiKey,
   });
 
@@ -42,15 +65,15 @@ export async function fetchFromSerpApi({
   }
 
   const data = await response.json();
-  const results: SerpApiNewsResult[] = data?.news_results ?? [];
+  const results: BingNewsResult[] = data?.organic_results ?? [];
 
   return results
     .filter((item) => item.title && item.link)
     .map((item) => ({
       title: item.title!,
       link: item.link!,
-      source: typeof item.source === "string" ? item.source : item.source?.name ?? "Unknown",
-      publishedAt: parseDate(item.iso_date, item.date),
+      source: item.source ?? "Unknown",
+      publishedAt: parseRelativeDate(item.date),
       snippet: item.snippet,
     }));
 }
