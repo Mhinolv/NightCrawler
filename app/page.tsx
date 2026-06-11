@@ -3,11 +3,12 @@
 import { useState } from "react";
 import SearchSidebar, { SearchParams } from "@/components/SearchSidebar";
 import ArticleCard from "@/components/ArticleCard";
-import { Article } from "@/lib/types";
+import { Article, SearchResponse } from "@/lib/types";
 
 export default function Home() {
   const [results, setResults] = useState<Article[] | null>(null);
   const [total, setTotal] = useState(0);
+  const [meta, setMeta] = useState<SearchResponse["meta"] | null>(null);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -29,12 +30,14 @@ export default function Home() {
         throw new Error(body?.error || `Search failed (${response.status})`);
       }
 
-      const data: { articles: Article[]; total: number } = await response.json();
+      const data: SearchResponse = await response.json();
       setResults(data.articles);
       setTotal(data.total);
+      setMeta(data.meta);
     } catch (err) {
       setResults(null);
       setTotal(0);
+      setMeta(null);
       setError(err instanceof Error ? err.message : "Search failed");
     } finally {
       setLoading(false);
@@ -83,16 +86,29 @@ export default function Home() {
               <div className="flex flex-col items-center justify-center py-24 text-center text-ink-3">
                 <p className="font-serif text-xl text-ink-2">No articles found</p>
                 <p className="mt-1 text-sm">Try a different state or widen the date window.</p>
+                {meta && (
+                  <p className="mt-3 font-mono text-xs uppercase tracking-mono text-ink-3">
+                    Scanned {meta.totalScanned} of {meta.totalUnique} articles found
+                  </p>
+                )}
               </div>
             )}
 
             {hasSearched && !loading && !error && results && results.length > 0 && (
               <>
-                <p className="font-mono text-xs uppercase tracking-mono text-ink-3">
-                  {results.length === total
-                    ? `${results.length} ${results.length === 1 ? "result" : "results"}`
-                    : `Showing ${results.length} of ${total} results`}
-                </p>
+                <div className="flex flex-col gap-1">
+                  <p className="font-mono text-xs uppercase tracking-mono text-ink-3">
+                    {results.length === total
+                      ? `${results.length} ${results.length === 1 ? "result" : "results"}`
+                      : `Showing ${results.length} of ${total} results`}
+                  </p>
+                  {meta && (
+                    <p className="font-mono text-xs uppercase tracking-mono text-ink-4">
+                      Scanned {meta.totalScanned} of {meta.totalUnique} articles found
+                      {meta.truncated ? " (some skipped due to volume)" : ""}
+                    </p>
+                  )}
+                </div>
                 {results.map((article) => (
                   <ArticleCard key={article.id} article={article} />
                 ))}

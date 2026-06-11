@@ -11,7 +11,7 @@ const VALID_SORTS: SortValue[] = ["newest", "oldest", "severity"];
 const VALID_PROVIDERS: ProviderValue[] = ["rss", "serpapi"];
 
 /** Cap on how many deduped articles get sent to Claude per search, to bound cost/latency. */
-const MAX_EXTRACTION_CANDIDATES = 40;
+const MAX_EXTRACTION_CANDIDATES = 75;
 
 interface StateRawArticle extends RawArticle {
   state: string;
@@ -109,9 +109,10 @@ export async function POST(req: NextRequest) {
     .filter((r): r is PromiseFulfilledResult<StateRawArticle[]> => r.status === "fulfilled")
     .flatMap((r) => r.value);
 
-  const deduped = dedupeArticles(rawArticles)
-    .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
-    .slice(0, MAX_EXTRACTION_CANDIDATES);
+  const dedupedAll = dedupeArticles(rawArticles).sort(
+    (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+  );
+  const deduped = dedupedAll.slice(0, MAX_EXTRACTION_CANDIDATES);
 
   const extractionInputs = deduped.map((article, index) => ({
     id: String(index),
@@ -163,6 +164,13 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({
     articles: limited,
     total: articles.length,
-    meta: { provider, queries: queryDebug },
+    meta: {
+      provider,
+      queries: queryDebug,
+      totalFetched: rawArticles.length,
+      totalUnique: dedupedAll.length,
+      totalScanned: deduped.length,
+      truncated: dedupedAll.length > MAX_EXTRACTION_CANDIDATES,
+    },
   });
 }

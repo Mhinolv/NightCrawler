@@ -24,3 +24,21 @@ export interface SearchRequest {
   /** "rss" (default, free) or "serpapi". */
   provider?: string;
 }
+
+export interface SearchResponse {
+  articles: Article[];
+  /** Number of relevant articles found, before the result limit is applied. */
+  total: number;
+  meta: {
+    provider: string;
+    queries: Array<{ state: string; query: string; count?: number; error?: string }>;
+    /** Raw articles returned across all state/keyword queries, before dedup. */
+    totalFetched: number;
+    /** Articles remaining after deduping by title. */
+    totalUnique: number;
+    /** Unique articles actually sent to Claude for relevance/extraction. */
+    totalScanned: number;
+    /** True if totalUnique exceeded the extraction cap and some articles were skipped. */
+    truncated: boolean;
+  };
+}
