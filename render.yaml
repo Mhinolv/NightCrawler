@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: nightcrawler
+    runtime: node
+    # Scan state lives in process memory, so this must be a single always-on
+    # instance. Free-tier spin-down would wipe active scans and kill result
+    # streams mid-flight — use a paid plan.
+    plan: starter
+    numInstances: 1
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-haiku-4-5
+      - key: HOOKDECK_SOURCE_URL
+        sync: false
+      - key: HOOKDECK_SIGNING_SECRET
+        sync: false
