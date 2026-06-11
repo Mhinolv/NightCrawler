@@ -1,45 +1,52 @@
 @import "tailwindcss";
 
 :root {
-  /* Surfaces — warm ivory base, white cards */
-  --paper: #fbf8f3;
-  --paper-2: #f4eee4;
-  --surface: #ffffff;
-  --surface-2: #fcfaf6;
+  /* Surfaces — near-black base, dark panels */
+  --paper: #0b0c0f;
+  --paper-2: #15171c;
+  --surface: #121317;
+  --surface-2: #1a1c22;
 
-  /* Ink — warm near-black */
-  --ink: #2a2622;
-  --ink-2: #6b6155;
-  --ink-3: #9c9286;
-  --ink-4: #c4baac;
+  /* Ink — light text on dark */
+  --ink: #f1f2f4;
+  --ink-2: #9aa0ab;
+  --ink-3: #6b7280;
+  --ink-4: #454952;
 
   /* Hairlines */
-  --line: #ece4d8;
-  --line-strong: #dfd5c5;
+  --line: #23262d;
+  --line-strong: #2f333c;
 
-  /* Coral — primary accent */
-  --coral: #ee6e4f;
-  --coral-deep: #d6573a;
-  --coral-soft: #fceae2;
-  --coral-line: #f6c9b8;
+  /* Coral — brand / fatal accent */
+  --coral: #ef4444;
+  --coral-deep: #dc2626;
+  --coral-soft: rgba(239, 68, 68, 0.14);
+  --coral-line: rgba(239, 68, 68, 0.32);
 
-  /* Teal — secondary accent */
+  /* Teal — secondary accent (unused, kept for compatibility) */
   --teal: #2f8079;
   --teal-deep: #246660;
-  --teal-soft: #e2efec;
-  --teal-line: #bcd9d3;
+  --teal-soft: #16302d;
+  --teal-line: #2a4a45;
+
+  /* Gold — injury accent */
+  --gold: #eab308;
+  --gold-soft: rgba(234, 179, 8, 0.14);
+
+  /* Blue — property / active accent */
+  --blue: #3b82f6;
+  --blue-deep: #2563eb;
+  --blue-soft: rgba(59, 130, 246, 0.14);
 
   /* Support */
-  --gold: #e0a33c;
-  --gold-soft: #fbf0da;
-  --positive: #3f9a6e;
-  --positive-soft: #e4f2ea;
-  --danger: #cf4b3e;
-  --danger-soft: #fbe6e3;
+  --positive: #22c55e;
+  --positive-soft: rgba(34, 197, 94, 0.14);
+  --danger: #ef4444;
+  --danger-soft: rgba(239, 68, 68, 0.14);
 
-  /* Shadows — soft, warm-tinted */
-  --shadow-sm: 0 2px 6px rgba(74, 58, 42, 0.06), 0 1px 2px rgba(74, 58, 42, 0.04);
-  --shadow-md: 0 8px 24px rgba(74, 58, 42, 0.08), 0 2px 6px rgba(74, 58, 42, 0.05);
+  /* Shadows */
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.25);
 }
 
 @theme inline {
@@ -68,6 +75,11 @@
 
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
+
+  --color-blue: var(--blue);
+  --color-blue-deep: var(--blue-deep);
+  --color-blue-soft: var(--blue-soft);
+
   --color-positive: var(--positive);
   --color-positive-soft: var(--positive-soft);
   --color-danger: var(--danger);

@@ -66,12 +66,26 @@ export const DEFAULT_KEYWORDS: string[] = [
 export interface TimeWindowOption {
   value: string;
   label: string;
+  short: string;
 }
 
 export const TIME_WINDOWS: TimeWindowOption[] = [
-  { value: "1d", label: "Last 24 hours" },
-  { value: "3d", label: "Last 3 days" },
-  { value: "7d", label: "Last 7 days" },
+  { value: "1d", label: "Last 24 hours", short: "24h" },
+  { value: "3d", label: "Last 3 days", short: "3d" },
+  { value: "7d", label: "Last 7 days", short: "7d" },
+];
+
+export type SeverityFilter = "fatal" | "injury" | "clear";
+
+export interface SeverityOption {
+  value: SeverityFilter;
+  label: string;
+}
+
+export const SEVERITY_OPTIONS: SeverityOption[] = [
+  { value: "fatal", label: "Fatal" },
+  { value: "injury", label: "Injury" },
+  { value: "clear", label: "Property" },
 ];
 
 export type SortValue = "newest" | "oldest" | "severity";
@@ -79,39 +93,26 @@ export type SortValue = "newest" | "oldest" | "severity";
 export interface SortOption {
   value: SortValue;
   label: string;
+  short: string;
 }
 
 export const SORT_OPTIONS: SortOption[] = [
-  { value: "newest", label: "Newest first" },
-  { value: "oldest", label: "Oldest first" },
-  { value: "severity", label: "Most severe first" },
+  { value: "newest", label: "Newest first", short: "Newest" },
+  { value: "oldest", label: "Oldest first", short: "Oldest" },
+  { value: "severity", label: "Most severe first", short: "Severity" },
 ];
-
-export interface LimitOption {
-  value: number;
-  label: string;
-}
-
-/** A limit of 0 means "no limit" (return all matching results). */
-export const RESULT_LIMITS: LimitOption[] = [
-  { value: 10, label: "10" },
-  { value: 25, label: "25" },
-  { value: 50, label: "50" },
-  { value: 0, label: "All" },
-];
-
-export const DEFAULT_RESULT_LIMIT = 25;
 
 export type ProviderValue = "rss" | "serpapi";
 
 export interface ProviderOption {
   value: ProviderValue;
   label: string;
+  short: string;
 }
 
 export const PROVIDER_OPTIONS: ProviderOption[] = [
-  { value: "rss", label: "Google News (RSS)" },
-  { value: "serpapi", label: "SerpAPI" },
+  { value: "rss", label: "Google News (RSS)", short: "RSS" },
+  { value: "serpapi", label: "Bing News (SerpAPI)", short: "SerpAPI" },
 ];
 
 export const DEFAULT_PROVIDER: ProviderValue = "rss";

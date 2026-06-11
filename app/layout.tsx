@@ -21,7 +21,7 @@ const dmMono = DM_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Accident Watch",
+  title: "Nightcrawler — Accident Intelligence",
   description: "Daily news scan for truck, 18-wheeler, and service vehicle accidents",
 };
 
