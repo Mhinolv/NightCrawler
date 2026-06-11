@@ -14,9 +14,17 @@ function parseSeenDate(value?: string): string {
   return `${year}-${month}-${day}T${hour}:${minute}:${second}Z`;
 }
 
+/** GDELT requires hyphenated words (e.g. "18-wheeler") to be quoted, or it rejects the query. */
+function quoteHyphenatedWords(query: string): string {
+  return query
+    .split(" ")
+    .map((word) => (word.includes("-") ? `"${word}"` : word))
+    .join(" ");
+}
+
 export async function fetchFromGdelt({ query, window }: FetchArticlesParams): Promise<RawArticle[]> {
   const params = new URLSearchParams({
-    query: `${query} sourcelang:english`,
+    query: `${quoteHyphenatedWords(query)} sourcelang:english`,
     mode: "artlist",
     format: "json",
     maxrecords: "50",
@@ -27,7 +35,11 @@ export async function fetchFromGdelt({ query, window }: FetchArticlesParams): Pr
     headers: { "User-Agent": "Mozilla/5.0 (compatible; AccidentWatch/1.0)" },
   });
   if (!response.ok) throw new Error(`GDELT request failed: ${response.status}`);
-  const data = await response.json();
+  const text = await response.text();
+  if (!text.trim().startsWith("{")) {
+    throw new Error(`GDELT request failed: ${text.trim()}`);
+  }
+  const data = JSON.parse(text);
   const articles: GdeltArticle[] = data?.articles ?? [];
 
   return articles
