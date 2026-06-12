@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import FilterBar from "@/components/FilterBar";
 import ResultsTable from "@/components/ResultsTable";
 import { getSeverity } from "@/lib/casualties";
@@ -9,6 +10,7 @@ import {
   DEFAULT_PROVIDER,
   PROVIDER_OPTIONS,
   ProviderValue,
+  SEVERITY_OPTIONS,
   SORT_OPTIONS,
   SortValue,
   SeverityFilter,
@@ -38,14 +40,84 @@ interface ScanProgress {
   total: number;
 }
 
-export default function Home() {
-  const [states, setStates] = useState<string[]>(["TX"]);
-  const [keywords, setKeywords] = useState<string[]>([DEFAULT_KEYWORDS[0]]);
-  const [customKeywords, setCustomKeywords] = useState<string[]>([]);
-  const [window, setWindow] = useState(TIME_WINDOWS[0].value);
-  const [sort, setSort] = useState<SortValue>(SORT_OPTIONS[0].value);
-  const [provider, setProvider] = useState<ProviderValue>(DEFAULT_PROVIDER);
-  const [severityFilter, setSeverityFilter] = useState<SeverityFilter[]>([]);
+const DEFAULT_STATES = ["TX"];
+const VALID_STATE_CODES = new Set(US_STATES.map((s) => s.code));
+const VALID_WINDOWS = new Set(TIME_WINDOWS.map((w) => w.value));
+const VALID_SORTS = new Set<string>(SORT_OPTIONS.map((s) => s.value));
+const VALID_PROVIDERS = new Set<string>(PROVIDER_OPTIONS.map((p) => p.value));
+const VALID_SEVERITIES = new Set<string>(SEVERITY_OPTIONS.map((s) => s.value));
+
+interface FilterState {
+  states: string[];
+  keywords: string[];
+  window: string;
+  sort: SortValue;
+  provider: ProviderValue;
+  severityFilter: SeverityFilter[];
+}
+
+/** Restores filter state from a bookmarked URL, falling back to defaults for anything invalid. */
+function parseFiltersFromUrl(params: { get(name: string): string | null; getAll(name: string): string[] }): FilterState {
+  const states = (params.get("states") ?? "")
+    .split(",")
+    .map((code) => code.trim().toUpperCase())
+    .filter((code) => VALID_STATE_CODES.has(code));
+  const keywords = params
+    .getAll("kw")
+    .map((keyword) => keyword.trim())
+    .filter(Boolean);
+  const window = params.get("window") ?? "";
+  const sort = params.get("sort") ?? "";
+  const provider = params.get("provider") ?? "";
+  const severityFilter = (params.get("severity") ?? "")
+    .split(",")
+    .filter((s) => VALID_SEVERITIES.has(s)) as SeverityFilter[];
+
+  return {
+    states: states.length > 0 ? states : [...DEFAULT_STATES],
+    keywords: keywords.length > 0 ? keywords : [DEFAULT_KEYWORDS[0]],
+    window: VALID_WINDOWS.has(window) ? window : TIME_WINDOWS[0].value,
+    sort: VALID_SORTS.has(sort) ? (sort as SortValue) : SORT_OPTIONS[0].value,
+    provider: VALID_PROVIDERS.has(provider) ? (provider as ProviderValue) : DEFAULT_PROVIDER,
+    severityFilter,
+  };
+}
+
+function Home() {
+  const searchParams = useSearchParams();
+  // Parsed once on mount: the URL is the source of truth for the initial
+  // filters, then filter changes write back to it via replaceState below.
+  const initial = useMemo(
+    () => parseFiltersFromUrl(searchParams),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const [states, setStates] = useState<string[]>(initial.states);
+  const [keywords, setKeywords] = useState<string[]>(initial.keywords);
+  const [customKeywords, setCustomKeywords] = useState<string[]>(
+    initial.keywords.filter((k) => !DEFAULT_KEYWORDS.includes(k))
+  );
+  const [window, setWindow] = useState(initial.window);
+  const [sort, setSort] = useState<SortValue>(initial.sort);
+  const [provider, setProvider] = useState<ProviderValue>(initial.provider);
+  const [severityFilter, setSeverityFilter] = useState<SeverityFilter[]>(initial.severityFilter);
+
+  // Mirror filters into the URL (omitting defaults) so the page is bookmarkable.
+  // replaceState avoids polluting browser history with every toggle.
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (states.join(",") !== DEFAULT_STATES.join(",")) params.set("states", states.join(","));
+    if (keywords.join("|") !== DEFAULT_KEYWORDS[0]) {
+      for (const keyword of keywords) params.append("kw", keyword);
+    }
+    if (window !== TIME_WINDOWS[0].value) params.set("window", window);
+    if (severityFilter.length > 0) params.set("severity", severityFilter.join(","));
+    if (sort !== SORT_OPTIONS[0].value) params.set("sort", sort);
+    if (provider !== DEFAULT_PROVIDER) params.set("provider", provider);
+    const query = params.toString();
+    globalThis.history.replaceState(null, "", query ? `?${query}` : globalThis.location.pathname);
+  }, [states, keywords, window, severityFilter, sort, provider]);
 
   const [results, setResults] = useState<Article[] | null>(null);
   const [meta, setMeta] = useState<SearchMeta | null>(null);
@@ -267,5 +339,14 @@ export default function Home() {
         </footer>
       )}
     </div>
+  );
+}
+
+export default function Page() {
+  // useSearchParams requires a Suspense boundary during prerendering.
+  return (
+    <Suspense fallback={null}>
+      <Home />
+    </Suspense>
   );
 }
