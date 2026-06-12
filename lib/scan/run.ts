@@ -1,5 +1,6 @@
 import { normalizeTitle } from "@/lib/dedupe";
 import { extractArticleDetails } from "@/lib/extract";
+import { recordQueryResult, recordScanFinish } from "@/lib/metrics";
 import { fetchArticles } from "@/lib/providers";
 import { Article } from "@/lib/types";
 import { Scan, scanStore } from "./store";
@@ -39,6 +40,7 @@ function settle(scan: Scan): void {
         truncated: scan.totalUnique > MAX_EXTRACTION_CANDIDATES,
       },
     });
+    void recordScanFinish(scan);
   }
 }
 
@@ -46,6 +48,7 @@ function settle(scan: Scan): void {
 export function failScanQuery(scan: Scan, state: string, query: string, error: string): void {
   scan.queryDebug.push({ state, query, error });
   scanStore.append(scan, { type: "error", state, query, error });
+  void recordQueryResult(scan.id, state, query, null, null, error);
   settle(scan);
 }
 
@@ -117,6 +120,7 @@ export async function runScanQuery(payload: ScanJobPayload): Promise<{ ok: boole
 
     scan.queryDebug.push({ state, query, count: raw.length });
     scanStore.append(scan, { type: "articles", articles, state, query });
+    void recordQueryResult(scan.id, state, query, raw.length, articles.length, null);
     console.log(`[scan] (${scan.provider}) "${query}" -> ${raw.length} result(s)`);
     settle(scan);
   } catch (err) {

@@ -22,3 +22,5 @@ services:
         sync: false
       - key: HOOKDECK_SIGNING_SECRET
         sync: false
+      - key: DATABASE_URL
+        sync: false

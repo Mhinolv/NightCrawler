@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { DEFAULT_PROVIDER, ProviderValue, US_STATES } from "@/lib/config";
+import { recordScanStart } from "@/lib/metrics";
 import { TimeWindow } from "@/lib/providers";
 import { failScanQuery, runScanQuery, ScanJobPayload } from "@/lib/scan/run";
 import { Scan, scanStore } from "@/lib/scan/store";
@@ -66,6 +67,7 @@ export async function POST(req: NextRequest) {
   }
 
   const scan = scanStore.create(provider as ProviderValue, window as TimeWindow, queries);
+  void recordScanStart(scan, states, keywords);
   const payloads: ScanJobPayload[] = queries.map(({ state, query }) => ({
     scanId: scan.id,
     state,
